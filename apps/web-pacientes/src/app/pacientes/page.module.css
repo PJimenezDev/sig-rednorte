@@ -1,3 +1,74 @@
+/* Modal de confirmación */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modalBox {
+  background-color: #ffffff;
+  border-radius: 14px;
+  padding: 32px 28px 24px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  border: 1px solid #e2e8f0;
+}
+
+.modalTitle {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.modalText {
+  margin: 0 0 24px 0;
+  font-size: 14px;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+.modalBtnGroup {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.modalBtnSecondary {
+  padding: 9px 20px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background-color: #ffffff;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.modalBtnSecondary:hover {
+  background-color: #f8fafc;
+}
+
+.modalBtnDanger {
+  padding: 9px 20px;
+  border: none;
+  border-radius: 6px;
+  background-color: #ef4444;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.modalBtnDanger:hover {
+  background-color: #dc2626;
+}
+
 /* Layout general */
 .pageWrapper {
   background-color: #f4f7f6;

@@ -1,6 +1,0 @@
-{
-  "/page": "app/page.js",
-  "/pacientes/page": "app/pacientes/page.js",
-  "/auth/fake-claveunica/page": "app/auth/fake-claveunica/page.js",
-  "/api/auth/callback-simulado/route": "app/api/auth/callback-simulado/route.js"
-}

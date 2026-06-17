@@ -1,0 +1,10 @@
+{
+  "name": "@sig-rednorte/database",
+  "version": "1.0.0",
+  "private": true,
+  "main": "./src/client.ts",
+  "types": "./src/client.ts",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.43.4"
+  }
+}

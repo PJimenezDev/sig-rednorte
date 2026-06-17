@@ -1,0 +1,15 @@
+{
+  "name": "sig-rednorte",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Sistema Integrado de Gestión RedNorte - Monorepo MVP",
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint"
+  },
+  "devDependencies": {
+    "turbo": "^2.0.0"
+  },
+  "packageManager": "pnpm@9.0.0"
+}

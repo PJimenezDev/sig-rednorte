@@ -10,6 +10,7 @@ export default function DashboardPaciente() {
   const [listaEspera, setListaEspera] = useState<any[]>([]);
   const [cita, setCita] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [modalCancelar, setModalCancelar] = useState<{ citaId: string; agendaId: string } | null>(null);
   const router = useRouter();
 
   const fetchDashboardData = async () => {
@@ -86,14 +87,18 @@ export default function DashboardPaciente() {
     }
   };
 
-  const handleCancelarCita = async (citaId: string, agendaId: string) => {
-    if (!confirm('¿Está seguro de que desea cancelar esta cita programada?')) return;
+  const handleSolicitarCancelar = (citaId: string, agendaId: string) => {
+    setModalCancelar({ citaId, agendaId });
+  };
+
+  const handleConfirmarCancelar = async () => {
+    if (!modalCancelar) return;
     try {
-      await supabase.from('citas').update({ estado: 'cancelada' }).eq('id', citaId);
-      if (agendaId) {
-        await supabase.from('agendas').update({ disponible: true }).eq('id', agendaId);
+      await supabase.from('citas').update({ estado: 'cancelada' }).eq('id', modalCancelar.citaId);
+      if (modalCancelar.agendaId) {
+        await supabase.from('agendas').update({ disponible: true }).eq('id', modalCancelar.agendaId);
       }
-      alert('Cita cancelada correctamente. Tu lugar en la lista de espera se mantendrá vigente.');
+      setModalCancelar(null);
       fetchDashboardData();
     } catch (err: any) {
       console.error('Error al cancelar:', err.message);
@@ -160,7 +165,7 @@ export default function DashboardPaciente() {
               <CitaCard
                 cita={cita}
                 onConfirmar={handleConfirmarCita}
-                onCancelar={handleCancelarCita}
+                onCancelar={handleSolicitarCancelar}
               />
             ) : (
               <p className={styles.emptyState}>No tienes citas programadas.</p>
@@ -181,6 +186,25 @@ export default function DashboardPaciente() {
           </section>
         </div>
       </main>
+
+      {modalCancelar && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalBox}>
+            <p className={styles.modalTitle}>Cancelar cita</p>
+            <p className={styles.modalText}>
+              ¿Estás seguro de que deseas cancelar esta cita? Tu lugar en la lista de espera se reasignara a otro paciente.
+            </p>
+            <div className={styles.modalBtnGroup}>
+              <button className={styles.modalBtnSecondary} onClick={() => setModalCancelar(null)}>
+                Volver
+              </button>
+              <button className={styles.modalBtnDanger} onClick={handleConfirmarCancelar}>
+                Sí, cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -232,16 +256,16 @@ function CitaCard({ cita, onConfirmar, onCancelar }: {
         </p>
       </div>
 
-      {cita.estado === 'asignada' && (
-        <div className={styles.btnGroup}>
+      <div className={styles.btnGroup}>
+        {cita.estado === 'asignada' && (
           <button className={styles.btnConfirm} onClick={() => onConfirmar(cita.id)}>
             Confirmar Cita
           </button>
-          <button className={styles.btnCancel} onClick={() => onCancelar(cita.id, agendaId)}>
-            Cancelar
-          </button>
-        </div>
-      )}
+        )}
+        <button className={styles.btnCancel} onClick={() => onCancelar(cita.id, agendaId)}>
+          Cancelar
+        </button>
+      </div>
     </div>
   );
 }

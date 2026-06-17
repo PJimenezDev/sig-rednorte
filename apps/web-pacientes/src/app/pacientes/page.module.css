@@ -1,0 +1,370 @@
+/* Layout general */
+.pageWrapper {
+  background-color: #f4f7f6;
+  min-height: 100vh;
+  font-family: system-ui, sans-serif;
+  color: #1e293b;
+}
+
+.loadingContainer {
+  display: flex;
+  height: 100vh;
+  justify-content: center;
+  align-items: center;
+  background-color: #f4f7f6;
+}
+
+.loadingText {
+  font-weight: 500;
+  color: #64748b;
+  font-family: system-ui, sans-serif;
+}
+
+/* Header */
+.header {
+  background-color: #ffffff;
+  padding: 14px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.headerLogo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logoCircle {
+  border: 2px solid #0044b1;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logoDot {
+  width: 12px;
+  height: 12px;
+  background-color: #ef3b2c;
+  border-radius: 50%;
+}
+
+.logoTitle {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.logoSubtitle {
+  margin: 0;
+  font-size: 11px;
+  color: #64748b;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.userInfo {
+  text-align: right;
+}
+
+.userName {
+  margin: 0;
+  font-weight: 600;
+  font-size: 14px;
+  text-transform: capitalize;
+}
+
+.userRut {
+  margin: 0;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.logoutBtn {
+  padding: 8px 18px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background-color: #ffffff;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.logoutBtn:hover {
+  background-color: #f8fafc;
+}
+
+/* Main */
+.main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 36px 24px;
+}
+
+.welcomeTitle {
+  margin: 0 0 4px 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.welcomeSubtitle {
+  margin: 0 0 28px 0;
+  font-size: 14px;
+  color: #64748b;
+}
+
+/* KPIs */
+.kpiGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.kpiCard {
+  background-color: #ffffff;
+  padding: 18px 20px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.kpiLabel {
+  margin: 0 0 6px 0;
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.kpiValue {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 800;
+}
+
+.kpiValueBlue  { color: #0044b1; }
+.kpiValueAmber { color: #f59e0b; }
+.kpiValueGreen { color: #22c55e; }
+
+/* Grid de contenido */
+.contentGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+/* Card base */
+.card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 24px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.sectionTitle {
+  margin: 0 0 18px 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 12px;
+}
+
+/* Estado vacío */
+.emptyState {
+  padding: 32px 0;
+  text-align: center;
+  color: #94a3b8;
+  font-size: 14px;
+  margin: 0;
+}
+
+/* Cita card */
+.badgeRow {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12px;
+}
+
+.badgePending {
+  background-color: #fef3c7;
+  color: #d97706;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+
+.badgeConfirmed {
+  background-color: #dcfce7;
+  color: #15803d;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+
+.citaInnerCard {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 16px;
+  background-color: #f8fafc;
+}
+
+.citaEspecialidad {
+  margin: 0 0 10px 0;
+  color: #0044b1;
+  font-weight: 700;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.citaDetail {
+  margin: 5px 0;
+  font-size: 13px;
+  color: #475569;
+  text-transform: capitalize;
+}
+
+.citaLocation {
+  margin: 10px 0 0 0;
+  font-size: 12px;
+  color: #64748b;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 8px;
+}
+
+.btnGroup {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.btnConfirm {
+  flex: 1;
+  padding: 10px;
+  border-radius: 6px;
+  border: none;
+  background-color: #22c55e;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.btnConfirm:hover {
+  background-color: #16a34a;
+}
+
+.btnCancel {
+  flex: 1;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ef4444;
+  background-color: #ffffff;
+  color: #ef4444;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.btnCancel:hover {
+  background-color: #fef2f2;
+}
+
+/* Lista de espera card */
+.listaList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.listaEspecialidad {
+  margin: 0 0 12px 0;
+  color: #22c55e;
+  font-weight: 700;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.positionRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+}
+
+.positionLabel {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.positionNumber {
+  font-size: 24px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.progressBarContainer {
+  background-color: #e2e8f0;
+  height: 10px;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.progressBarFill {
+  background-color: #0044b1;
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.4s ease-out;
+}
+
+.progressFooter {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.progressTotal {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.progressPercent {
+  font-size: 12px;
+  color: #475569;
+  font-weight: 600;
+}
+
+.timeSection {
+  border-top: 1px solid #e2e8f0;
+  padding-top: 10px;
+}
+
+.timeLabel {
+  margin: 0;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.timeValue {
+  margin: 2px 0 0 0;
+  font-size: 18px;
+  font-weight: 800;
+  color: #0f172a;
+}

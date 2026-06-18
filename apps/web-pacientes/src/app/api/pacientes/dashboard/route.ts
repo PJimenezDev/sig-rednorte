@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
 
   if (!paciente) return NextResponse.json({ error: 'Paciente no encontrado' }, { status: 404 });
 
-  const [{ data: listaEspera }, { data: cita }] = await Promise.all([
+  const [{ data: listaEspera }, { data: citas }] = await Promise.all([
     supabase
       .from('lista_espera')
       .select('posicion_actual_fila, total_pacientes_especialidad, tiempo_estimado_espera_dias, especialidad_solicitada')
@@ -27,10 +27,10 @@ export async function GET(req: NextRequest) {
       .select('id, estado, agendas(id, fecha_hora_inicio, medicos(nombre, apellido, recintos(nombre, comuna)))')
       .eq('paciente_id', paciente.id)
       .in('estado', ['asignada', 'confirmada'])
-      .maybeSingle(),
+      .order('created_at', { ascending: false }),
   ]);
 
-  return NextResponse.json({ listaEspera: listaEspera ?? [], cita: cita ?? null });
+  return NextResponse.json({ listaEspera: listaEspera ?? [], citas: citas ?? [] });
 }
 
 export async function OPTIONS() {

@@ -11,7 +11,7 @@ export default function DashboardPaciente() {
   const [rut, setRut] = useState<string>('—');
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [listaEspera, setListaEspera] = useState<any[]>([]);
-  const [cita, setCita] = useState<any>(null);
+  const [citas, setCitas] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalCancelar, setModalCancelar] = useState<{ citaId: string; agendaId: string } | null>(null);
   const router = useRouter();
@@ -37,7 +37,7 @@ export default function DashboardPaciente() {
       if (res.status === 401) { router.push('/login'); return; }
       const data = await res.json();
       setListaEspera(data.listaEspera ?? []);
-      setCita(data.cita ?? null);
+      setCitas(data.citas ?? []);
     } catch {
       console.error('Error cargando datos del dashboard');
     } finally {
@@ -84,8 +84,8 @@ export default function DashboardPaciente() {
     );
   }
 
-  const citasConfirmadas = cita?.estado === 'confirmada' ? 1 : 0;
-  const notificaciones = cita?.estado === 'asignada' ? 1 : 0;
+  const citasConfirmadas = citas.filter((c: any) => c.estado === 'confirmada').length;
+  const notificaciones = citas.filter((c: any) => c.estado === 'asignada').length;
 
   return (
     <div className={styles.pageWrapper}>
@@ -122,12 +122,17 @@ export default function DashboardPaciente() {
         <div className={styles.contentGrid}>
           <section className={styles.card}>
             <h3 className={styles.sectionTitle}>Mis Citas Médicas</h3>
-            {cita ? (
-              <CitaCard
-                cita={cita}
-                onConfirmar={handleConfirmarCita}
-                onCancelar={handleSolicitarCancelar}
-              />
+            {citas.length > 0 ? (
+              <div className={styles.citasList}>
+                {citas.map((c: any) => (
+                  <CitaCard
+                    key={c.id}
+                    cita={c}
+                    onConfirmar={handleConfirmarCita}
+                    onCancelar={handleSolicitarCancelar}
+                  />
+                ))}
+              </div>
             ) : (
               <p className={styles.emptyState}>No tienes citas programadas.</p>
             )}

@@ -6,6 +6,20 @@ import styles from './page.module.css';
 
 const API = process.env.NEXT_PUBLIC_API_RECEPCIONISTA ?? 'http://localhost:3021';
 
+const formatearRut = (valor: string): string => {
+  const limpio = valor.replace(/[^0-9kK-]/g, '');
+  if (!limpio.includes('-')) return limpio;
+  const [cuerpo, dv] = limpio.split('-');
+  const dvLimpio = (dv ?? '').replace(/[^0-9kK]/g, '').slice(0, 1);
+  const cuerpoFormateado = cuerpo.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  return dvLimpio ? `${cuerpoFormateado}-${dvLimpio}` : `${cuerpoFormateado}-`;
+};
+
+const rutTieneFormato = (rut: string): boolean => {
+  const partes = rut.split('-');
+  return partes.length === 2 && partes[0].length > 0 && partes[1].length === 1;
+};
+
 interface Especialidad {
   id: string;
   nombre: string;
@@ -68,7 +82,8 @@ export default function DashboardRecepcionista() {
   };
 
   const abrirModal = async () => {
-    setFormCita({ rutPaciente: '', ramaMedicina: '', rutMedico: '', fecha: '', hora: '' });
+    const rutActual = sessionStorage.getItem('rut_usuario') ?? '';
+    setFormCita({ rutPaciente: '', ramaMedicina: '', rutMedico: rutActual, fecha: '', hora: '' });
     setAgendarError(null);
     setModalAgendar(true);
 
@@ -91,6 +106,11 @@ export default function DashboardRecepcionista() {
 
     if (!formCita.rutPaciente || !formCita.rutMedico || !formCita.fecha || !formCita.hora) {
       setAgendarError('Por favor complete todos los campos obligatorios.');
+      return;
+    }
+
+    if (!rutTieneFormato(formCita.rutPaciente)) {
+      setAgendarError('Ingrese el RUT del paciente con guión y dígito verificador (ej: 12.345.678-9).');
       return;
     }
 
@@ -215,9 +235,9 @@ export default function DashboardRecepcionista() {
                 <input
                   className={styles.formInput}
                   type="text"
-                  placeholder="12.345.678-9"
+                  placeholder="Ingrese RUT con guión y dígito verificador"
                   value={formCita.rutPaciente}
-                  onChange={e => setFormCita(f => ({ ...f, rutPaciente: e.target.value }))}
+                  onChange={e => setFormCita(f => ({ ...f, rutPaciente: formatearRut(e.target.value) }))}
                 />
               </div>
 
@@ -238,11 +258,10 @@ export default function DashboardRecepcionista() {
               <div className={styles.formRow}>
                 <label className={styles.formLabel}>RUT doctor:</label>
                 <input
-                  className={styles.formInput}
+                  className={styles.formInputReadonly}
                   type="text"
-                  placeholder="12.345.678-9"
                   value={formCita.rutMedico}
-                  onChange={e => setFormCita(f => ({ ...f, rutMedico: e.target.value }))}
+                  readOnly
                 />
               </div>
 

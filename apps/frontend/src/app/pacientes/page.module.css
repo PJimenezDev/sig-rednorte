@@ -1,3 +1,9 @@
+.citasList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
 /* Modal de confirmación */
 .modalOverlay {
   position: fixed;

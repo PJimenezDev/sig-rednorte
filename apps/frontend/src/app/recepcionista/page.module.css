@@ -321,3 +321,242 @@
   color: #475569;
   font-weight: 600;
 }
+
+/* Modal */
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modalBox {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 28px 32px;
+  width: 100%;
+  max-width: 540px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 14px;
+}
+
+.modalTitle {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.modalClose {
+  background: none;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  color: #64748b;
+  padding: 0 4px;
+  line-height: 1;
+}
+
+.modalClose:hover { color: #0f172a; }
+
+.modalForm {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.formRow {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.formLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.formInput {
+  padding: 9px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #0f172a;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.formInput:focus { border-color: #0044b1; }
+
+.formSelect {
+  padding: 9px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #0f172a;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+  background-color: #ffffff;
+}
+
+.formSelect:focus { border-color: #0044b1; }
+
+.formRowFechaHora {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.formColFecha {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.formColHora {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 110px;
+}
+
+.formError {
+  font-size: 12px;
+  color: #dc2626;
+  margin: 0;
+}
+
+.modalBtnGroup {
+  display: flex;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.btnConfirmarCita {
+  flex: 1;
+  padding: 11px;
+  border-radius: 8px;
+  border: 2px solid #22c55e;
+  background-color: #ffffff;
+  color: #15803d;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btnConfirmarCita:hover { background-color: #f0fdf4; }
+.btnConfirmarCita:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.btnCancelarCita {
+  flex: 1;
+  padding: 11px;
+  border-radius: 8px;
+  border: 2px solid #ef4444;
+  background-color: #ffffff;
+  color: #dc2626;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btnCancelarCita:hover { background-color: #fef2f2; }
+
+/* Calendario */
+
+.calendario {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+  font-size: 12px;
+  background-color: #ffffff;
+}
+
+.calHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+  background-color: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.calMesAno {
+  font-weight: 600;
+  font-size: 12px;
+  color: #0f172a;
+}
+
+.calNavBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  color: #64748b;
+  padding: 0 6px;
+  line-height: 1;
+}
+
+.calNavBtn:hover { color: #0044b1; }
+
+.calGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  padding: 6px;
+  gap: 2px;
+}
+
+.calNombreDia {
+  text-align: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: #94a3b8;
+  padding: 4px 0;
+  text-transform: uppercase;
+}
+
+.calDia {
+  text-align: center;
+  padding: 5px 2px;
+  border-radius: 4px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 12px;
+  color: #0f172a;
+  width: 100%;
+}
+
+.calDia:hover { background-color: #f0f9ff; }
+
+.calDiaHoy {
+  color: #0044b1;
+  font-weight: 700;
+}
+
+.calDiaSel {
+  background-color: #0044b1 !important;
+  color: #ffffff !important;
+  font-weight: 700;
+}
+
+.calDiaSel:hover { background-color: #003494 !important; }

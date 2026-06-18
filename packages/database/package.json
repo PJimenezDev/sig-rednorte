@@ -6,5 +6,8 @@
   "types": "./src/client.ts",
   "dependencies": {
     "@supabase/supabase-js": "^2.43.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.12"
   }
 }

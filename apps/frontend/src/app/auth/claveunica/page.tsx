@@ -53,7 +53,9 @@ export default function ClaveunicaPage() {
 
       sessionStorage.setItem('access_token', data.access_token);
       sessionStorage.setItem('refresh_token', data.refresh_token);
-      if (data.nombre) sessionStorage.setItem('nombre_usuario', data.nombre);
+      const nombreCompleto = [data.nombre, data.apellido_paterno, data.apellido_materno].filter(Boolean).join(' ');
+      if (nombreCompleto) sessionStorage.setItem('nombre_usuario', nombreCompleto);
+      if (data.rut) sessionStorage.setItem('rut_usuario', data.rut);
 
       router.push('/pacientes');
     } catch (err: any) {

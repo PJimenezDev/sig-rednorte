@@ -8,6 +8,7 @@ const API = process.env.NEXT_PUBLIC_API_RECEPCIONISTA ?? 'http://localhost:3021'
 
 export default function DashboardRecepcionista() {
   const [nombre, setNombre] = useState<string>('Recepcionista');
+  const [rut, setRut] = useState<string>('—');
   const [citas, setCitas] = useState<any[]>([]);
   const [listaEspera, setListaEspera] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -19,6 +20,8 @@ export default function DashboardRecepcionista() {
 
     const n = sessionStorage.getItem('nombre_usuario');
     if (n) setNombre(n);
+    const r = sessionStorage.getItem('rut_usuario');
+    if (r) setRut(r);
 
     fetchDashboard(token);
   }, []);
@@ -71,6 +74,7 @@ export default function DashboardRecepcionista() {
         <div className={styles.headerRight}>
           <div className={styles.userInfo}>
             <p className={styles.userName}>{nombre}</p>
+            <p className={styles.userRut}>RUT: {rut}</p>
           </div>
           <button className={styles.logoutBtn} onClick={handleLogout}>Salir</button>
         </div>

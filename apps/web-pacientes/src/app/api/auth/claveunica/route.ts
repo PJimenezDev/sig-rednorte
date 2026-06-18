@@ -63,6 +63,9 @@ export async function POST(req: NextRequest) {
     refresh_token: data.session.refresh_token,
     role: 'paciente',
     nombre: paciente.nombre,
+    apellido_paterno: paciente.apellido_paterno,
+    apellido_materno: paciente.apellido_materno,
+    rut: paciente.rut,
   });
 }
 

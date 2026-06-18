@@ -8,6 +8,7 @@ const API = process.env.NEXT_PUBLIC_API_PACIENTES ?? 'http://localhost:3020';
 
 export default function DashboardPaciente() {
   const [nombre, setNombre] = useState<string>('Paciente');
+  const [rut, setRut] = useState<string>('—');
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [listaEspera, setListaEspera] = useState<any[]>([]);
   const [cita, setCita] = useState<any>(null);
@@ -21,6 +22,8 @@ export default function DashboardPaciente() {
 
     const n = sessionStorage.getItem('nombre_usuario');
     if (n) setNombre(n);
+    const r = sessionStorage.getItem('rut_usuario');
+    if (r) setRut(r);
     setAccessToken(token);
 
     fetchDashboard(token);
@@ -100,6 +103,7 @@ export default function DashboardPaciente() {
         <div className={styles.headerRight}>
           <div className={styles.userInfo}>
             <p className={styles.userName}>{nombre}</p>
+            <p className={styles.userRut}>RUT: {rut}</p>
           </div>
           <button className={styles.logoutBtn} onClick={handleLogout}>Salir</button>
         </div>

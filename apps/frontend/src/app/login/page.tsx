@@ -30,11 +30,13 @@ export default function LoginPage() {
         return;
       }
 
-      const { access_token, refresh_token, role, nombre } = await res.json();
+      const { access_token, refresh_token, role, nombre, apellido, apellido_paterno, apellido_materno, rut } = await res.json();
 
       sessionStorage.setItem('access_token', access_token);
       sessionStorage.setItem('refresh_token', refresh_token);
-      if (nombre) sessionStorage.setItem('nombre_usuario', nombre);
+      const nombreCompleto = [nombre, apellido ?? apellido_paterno, apellido_materno].filter(Boolean).join(' ');
+      if (nombreCompleto) sessionStorage.setItem('nombre_usuario', nombreCompleto);
+      if (rut) sessionStorage.setItem('rut_usuario', rut);
 
       if (role === 'paciente') {
         router.push('/pacientes');

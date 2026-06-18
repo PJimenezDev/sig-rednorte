@@ -10,20 +10,42 @@ export async function POST(req: NextRequest) {
   }
 
   const sc = createServerClient(data.session.access_token);
+
   const { data: paciente } = await sc
     .from('pacientes')
-    .select('id, nombre')
+    .select('id, nombre, apellido_paterno, apellido_materno')
     .eq('correo', email.toLowerCase())
     .maybeSingle();
 
-  const role = paciente ? 'paciente' : 'staff';
-  const nombre = paciente?.nombre ?? data.user.user_metadata?.nombre ?? null;
+  if (paciente) {
+    return NextResponse.json({
+      access_token: data.session.access_token,
+      refresh_token: data.session.refresh_token,
+      role: 'paciente',
+      nombre: paciente.nombre,
+      apellido_paterno: paciente.apellido_paterno,
+      apellido_materno: paciente.apellido_materno,
+    });
+  }
+
+  const { data: medico } = await sc
+    .from('medicos')
+    .select('id, nombre, apellido, rut')
+    .eq('correo', email.toLowerCase())
+    .maybeSingle();
+
+  const meta = data.user.user_metadata ?? {};
+  const nombreStaff = medico?.nombre ?? meta.nombre ?? email.split('@')[0];
+  const apellidoStaff = medico?.apellido ?? meta.apellido ?? null;
+  const rutStaff = medico?.rut ?? meta.rut ?? null;
 
   return NextResponse.json({
     access_token: data.session.access_token,
     refresh_token: data.session.refresh_token,
-    role,
-    nombre,
+    role: 'staff',
+    nombre: nombreStaff,
+    apellido: apellidoStaff,
+    rut: rutStaff,
   });
 }
 

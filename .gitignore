@@ -1,2 +1,22 @@
 **/node_modules/
 **/.next/
+
+# Variables de entorno — NUNCA subir al repositorio
+**/.env
+**/.env.local
+**/.env.development
+**/.env.production
+**/.env*.local
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Turbo
+.turbo
+
+# Build outputs
+**/dist/
+**/out/
+
+

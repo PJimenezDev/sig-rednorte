@@ -6,12 +6,32 @@ import styles from './page.module.css';
 
 const API = process.env.NEXT_PUBLIC_API_RECEPCIONISTA ?? 'http://localhost:3021';
 
+interface Especialidad {
+  id: string;
+  nombre: string;
+}
+
+interface FormCita {
+  rutPaciente: string;
+  ramaMedicina: string;
+  rutMedico: string;
+  fecha: string;
+  hora: string;
+}
+
 export default function DashboardRecepcionista() {
   const [nombre, setNombre] = useState<string>('Recepcionista');
   const [rut, setRut] = useState<string>('—');
   const [citas, setCitas] = useState<any[]>([]);
   const [listaEspera, setListaEspera] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const [modalAgendar, setModalAgendar] = useState(false);
+  const [especialidades, setEspecialidades] = useState<Especialidad[]>([]);
+  const [formCita, setFormCita] = useState<FormCita>({ rutPaciente: '', ramaMedicina: '', rutMedico: '', fecha: '', hora: '' });
+  const [agendarError, setAgendarError] = useState<string | null>(null);
+  const [agendarLoading, setAgendarLoading] = useState(false);
+
   const router = useRouter();
 
   useEffect(() => {
@@ -45,6 +65,67 @@ export default function DashboardRecepcionista() {
   const handleLogout = () => {
     sessionStorage.clear();
     router.push('/login');
+  };
+
+  const abrirModal = async () => {
+    setFormCita({ rutPaciente: '', ramaMedicina: '', rutMedico: '', fecha: '', hora: '' });
+    setAgendarError(null);
+    setModalAgendar(true);
+
+    const token = sessionStorage.getItem('access_token');
+    if (!token) return;
+
+    try {
+      const res = await fetch(`${API}/api/recepcionista/especialidades`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      setEspecialidades(data.especialidades ?? []);
+    } catch {
+      setEspecialidades([]);
+    }
+  };
+
+  const handleAgendarCita = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!formCita.rutPaciente || !formCita.rutMedico || !formCita.fecha || !formCita.hora) {
+      setAgendarError('Por favor complete todos los campos obligatorios.');
+      return;
+    }
+
+    const token = sessionStorage.getItem('access_token');
+    if (!token) return;
+
+    setAgendarLoading(true);
+    setAgendarError(null);
+
+    try {
+      const res = await fetch(`${API}/api/recepcionista/citas`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          rutPaciente: formCita.rutPaciente,
+          rutMedico: formCita.rutMedico,
+          fecha: formCita.fecha,
+          hora: formCita.hora,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setAgendarError(data.error ?? 'Error al agendar la cita.');
+        return;
+      }
+
+      setModalAgendar(false);
+      fetchDashboard(token);
+    } catch {
+      setAgendarError('Error de conexión. Intente nuevamente.');
+    } finally {
+      setAgendarLoading(false);
+    }
   };
 
   if (loading) {
@@ -102,7 +183,7 @@ export default function DashboardRecepcionista() {
                 ))}
               </div>
             )}
-            <button className={styles.btnAgendar}>Agendar nueva cita</button>
+            <button className={styles.btnAgendar} onClick={abrirModal}>Agendar nueva cita</button>
           </section>
 
           <section className={styles.card}>
@@ -119,6 +200,85 @@ export default function DashboardRecepcionista() {
           </section>
         </div>
       </main>
+
+      {modalAgendar && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalBox}>
+            <div className={styles.modalHeader}>
+              <h3 className={styles.modalTitle}>Agendar cita</h3>
+              <button type="button" className={styles.modalClose} onClick={() => setModalAgendar(false)}>×</button>
+            </div>
+
+            <form onSubmit={handleAgendarCita} className={styles.modalForm}>
+              <div className={styles.formRow}>
+                <label className={styles.formLabel}>RUT paciente:</label>
+                <input
+                  className={styles.formInput}
+                  type="text"
+                  placeholder="12.345.678-9"
+                  value={formCita.rutPaciente}
+                  onChange={e => setFormCita(f => ({ ...f, rutPaciente: e.target.value }))}
+                />
+              </div>
+
+              <div className={styles.formRow}>
+                <label className={styles.formLabel}>ramaMedicina</label>
+                <select
+                  className={styles.formSelect}
+                  value={formCita.ramaMedicina}
+                  onChange={e => setFormCita(f => ({ ...f, ramaMedicina: e.target.value }))}
+                >
+                  <option value="">Seleccione especialización</option>
+                  {especialidades.map(esp => (
+                    <option key={esp.id} value={esp.id}>{esp.nombre}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className={styles.formRow}>
+                <label className={styles.formLabel}>RUT doctor:</label>
+                <input
+                  className={styles.formInput}
+                  type="text"
+                  placeholder="12.345.678-9"
+                  value={formCita.rutMedico}
+                  onChange={e => setFormCita(f => ({ ...f, rutMedico: e.target.value }))}
+                />
+              </div>
+
+              <div className={styles.formRowFechaHora}>
+                <div className={styles.formColFecha}>
+                  <label className={styles.formLabel}>Fecha:</label>
+                  <CalendarioMini
+                    selectedDate={formCita.fecha}
+                    onSelect={fecha => setFormCita(f => ({ ...f, fecha }))}
+                  />
+                </div>
+                <div className={styles.formColHora}>
+                  <label className={styles.formLabel}>Hora:</label>
+                  <input
+                    className={styles.formInput}
+                    type="time"
+                    value={formCita.hora}
+                    onChange={e => setFormCita(f => ({ ...f, hora: e.target.value }))}
+                  />
+                </div>
+              </div>
+
+              {agendarError && <p className={styles.formError}>{agendarError}</p>}
+
+              <div className={styles.modalBtnGroup}>
+                <button type="submit" className={styles.btnConfirmarCita} disabled={agendarLoading}>
+                  {agendarLoading ? 'Agendando...' : 'Agendar cita'}
+                </button>
+                <button type="button" className={styles.btnCancelarCita} onClick={() => setModalAgendar(false)}>
+                  No agendar cita
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -189,6 +349,69 @@ function ListaItem({ datos, total }: { datos: any; total: number }) {
       <div className={styles.progressFooter}>
         <span className={styles.progressTotal}>Total: {total} pacientes</span>
         <span className={styles.progressPercent}>{porcentaje}% avanzado</span>
+      </div>
+    </div>
+  );
+}
+
+function CalendarioMini({ selectedDate, onSelect }: { selectedDate: string; onSelect: (date: string) => void }) {
+  const hoy = new Date();
+  const [viewYear, setViewYear] = useState(hoy.getFullYear());
+  const [viewMonth, setViewMonth] = useState(hoy.getMonth());
+
+  const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+  const diasSemana = ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'];
+
+  const primerDia = new Date(viewYear, viewMonth, 1).getDay();
+  const diasEnMes = new Date(viewYear, viewMonth + 1, 0).getDate();
+
+  const celdas: (number | null)[] = [];
+  for (let i = 0; i < primerDia; i++) celdas.push(null);
+  for (let d = 1; d <= diasEnMes; d++) celdas.push(d);
+
+  const irMesAnterior = () => {
+    if (viewMonth === 0) { setViewMonth(11); setViewYear(y => y - 1); }
+    else setViewMonth(m => m - 1);
+  };
+
+  const irMesSiguiente = () => {
+    if (viewMonth === 11) { setViewMonth(0); setViewYear(y => y + 1); }
+    else setViewMonth(m => m + 1);
+  };
+
+  const seleccionarDia = (dia: number) => {
+    const d = String(dia).padStart(2, '0');
+    const m = String(viewMonth + 1).padStart(2, '0');
+    onSelect(`${viewYear}-${m}-${d}`);
+  };
+
+  return (
+    <div className={styles.calendario}>
+      <div className={styles.calHeader}>
+        <button type="button" className={styles.calNavBtn} onClick={irMesAnterior}>&#8249;</button>
+        <span className={styles.calMesAno}>{meses[viewMonth]} {viewYear}</span>
+        <button type="button" className={styles.calNavBtn} onClick={irMesSiguiente}>&#8250;</button>
+      </div>
+      <div className={styles.calGrid}>
+        {diasSemana.map(d => (
+          <span key={d} className={styles.calNombreDia}>{d}</span>
+        ))}
+        {celdas.map((dia, i) => {
+          if (dia === null) return <span key={`v-${i}`} />;
+          const dateStr = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
+          const esSel = dateStr === selectedDate;
+          const esHoy = dia === hoy.getDate() && viewMonth === hoy.getMonth() && viewYear === hoy.getFullYear();
+          return (
+            <button
+              key={dia}
+              type="button"
+              onClick={() => seleccionarDia(dia)}
+              className={`${styles.calDia} ${esSel ? styles.calDiaSel : ''} ${esHoy && !esSel ? styles.calDiaHoy : ''}`}
+            >
+              {dia}
+            </button>
+          );
+        })}
       </div>
     </div>
   );

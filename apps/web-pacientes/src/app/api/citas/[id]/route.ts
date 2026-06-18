@@ -13,7 +13,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   } else if (action === 'cancelar') {
     await supabase.from('citas').update({ estado: 'cancelada' }).eq('id', params.id);
     if (agendaId) {
-      await supabase.from('agendas').update({ estado: 'disponible' }).eq('id', agendaId);
+      await supabase.from('agendas').update({ disponible: true }).eq('id', agendaId);
     }
   }
 

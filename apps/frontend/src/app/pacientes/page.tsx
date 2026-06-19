@@ -14,6 +14,16 @@ export default function DashboardPaciente() {
   const [citas, setCitas] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalCancelar, setModalCancelar] = useState<{ citaId: string; agendaId: string } | null>(null);
+  const [modalCancelarLista, setModalCancelarLista] = useState<string | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
+  const [modalSolicitar, setModalSolicitar] = useState(false);
+  const [especialidades, setEspecialidades] = useState<{ id: string; nombre: string }[]>([]);
+  const [recintos, setRecintos] = useState<{ id: string; nombre: string; comuna: string }[]>([]);
+  const [medicoRecintos, setMedicoRecintos] = useState<{ especialidad_id: string; recinto_id: string }[]>([]);
+  const [especialidadSel, setEspecialidadSel] = useState('');
+  const [recintoSel, setRecintoSel] = useState('');
+  const [solicitarLoading, setSolicitarLoading] = useState(false);
+  const [solicitarError, setSolicitarError] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -52,7 +62,8 @@ export default function DashboardPaciente() {
       headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'confirmar' }),
     });
-    alert('¡Cita médica confirmada con éxito!');
+    setToast('Cita médica confirmada con éxito.');
+    setTimeout(() => setToast(null), 3500);
     fetchDashboard(accessToken);
   };
 
@@ -71,9 +82,68 @@ export default function DashboardPaciente() {
     fetchDashboard(accessToken);
   };
 
+  const handleCancelarLista = async () => {
+    if (!modalCancelarLista || !accessToken) return;
+    await fetch(`${API}/api/pacientes/solicitar-hora`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: modalCancelarLista }),
+    });
+    setModalCancelarLista(null);
+    setToast('Solicitud cancelada correctamente.');
+    setTimeout(() => setToast(null), 3500);
+    fetchDashboard(accessToken);
+  };
+
   const handleLogout = () => {
     sessionStorage.clear();
     router.push('/login');
+  };
+
+  const abrirModalSolicitar = async () => {
+    setSolicitarError(null);
+    setEspecialidadSel('');
+    setRecintoSel('');
+    setModalSolicitar(true);
+    const token = sessionStorage.getItem('access_token');
+    if (!token) return;
+    try {
+      const res = await fetch(`${API}/api/pacientes/solicitar-hora`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      setEspecialidades(data.especialidades ?? []);
+      setRecintos(data.recintos ?? []);
+      setMedicoRecintos(data.medicoRecintos ?? []);
+    } catch {
+      setEspecialidades([]);
+      setRecintos([]);
+      setMedicoRecintos([]);
+    }
+  };
+
+  const handleSolicitarHora = async () => {
+    if (!especialidadSel) { setSolicitarError('Selecciona una especialidad.'); return; }
+    if (!recintoSel) { setSolicitarError('Selecciona un recinto.'); return; }
+    const token = sessionStorage.getItem('access_token');
+    if (!token) return;
+    setSolicitarLoading(true);
+    setSolicitarError(null);
+    try {
+      const res = await fetch(`${API}/api/pacientes/solicitar-hora`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ especialidadId: especialidadSel, recintoId: recintoSel }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setSolicitarError(data.error ?? 'Error al solicitar.'); return; }
+      setModalSolicitar(false);
+      fetchDashboard(token);
+    } catch {
+      setSolicitarError('Error de conexión.');
+    } finally {
+      setSolicitarLoading(false);
+    }
   };
 
   if (loading) {
@@ -145,13 +215,67 @@ export default function DashboardPaciente() {
             ) : (
               <div className={styles.listaList}>
                 {listaEspera.map((entrada: any, i: number) => (
-                  <ListaEsperaCard key={i} datos={entrada} />
+                  <ListaEsperaCard key={i} datos={entrada} onCancelar={() => setModalCancelarLista(entrada.id)} />
                 ))}
               </div>
             )}
+            <button className={styles.btnSolicitar} onClick={abrirModalSolicitar}>
+              Solicitar hora
+            </button>
           </section>
         </div>
       </main>
+
+      {toast && (
+        <div className={styles.toast}>
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+            <polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
+          {toast}
+        </div>
+      )}
+
+      {modalSolicitar && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalBox}>
+            <p className={styles.modalTitle}>Solicitar hora médica</p>
+            <p className={styles.modalText}>Selecciona la especialidad y el recinto donde deseas ser atendido. Un médico de esa especialidad te asignará una fecha.</p>
+            <select
+              className={styles.modalSelect}
+              value={especialidadSel}
+              onChange={e => { setEspecialidadSel(e.target.value); setRecintoSel(''); }}
+            >
+              <option value="">Selecciona especialidad</option>
+              {especialidades.map((esp: any) => (
+                <option key={esp.id} value={esp.id}>{esp.nombre}</option>
+              ))}
+            </select>
+            <select
+              className={styles.modalSelect}
+              value={recintoSel}
+              onChange={e => setRecintoSel(e.target.value)}
+              disabled={!especialidadSel}
+            >
+              <option value="">{especialidadSel ? 'Selecciona recinto' : 'Primero selecciona especialidad'}</option>
+              {recintos
+                .filter(r => medicoRecintos.some(mr => mr.especialidad_id === especialidadSel && mr.recinto_id === r.id))
+                .map((r: any) => (
+                  <option key={r.id} value={r.id}>{r.nombre} — {r.comuna}</option>
+                ))}
+            </select>
+            {solicitarError && <p className={styles.modalError}>{solicitarError}</p>}
+            <div className={styles.modalBtnGroup}>
+              <button className={styles.modalBtnSecondary} onClick={() => setModalSolicitar(false)}>
+                Cancelar
+              </button>
+              <button className={styles.modalBtnPrimary} onClick={handleSolicitarHora} disabled={solicitarLoading}>
+                {solicitarLoading ? 'Solicitando...' : 'Solicitar hora'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {modalCancelar && (
         <div className={styles.modalOverlay}>
@@ -165,6 +289,25 @@ export default function DashboardPaciente() {
                 Volver
               </button>
               <button className={styles.modalBtnDanger} onClick={handleConfirmarCancelar}>
+                Sí, cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {modalCancelarLista && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalBox}>
+            <p className={styles.modalTitle}>Cancelar solicitud</p>
+            <p className={styles.modalText}>
+              ¿Estás seguro de que deseas cancelar esta solicitud de hora? Serás removido de la lista de espera.
+            </p>
+            <div className={styles.modalBtnGroup}>
+              <button className={styles.modalBtnSecondary} onClick={() => setModalCancelarLista(null)}>
+                Volver
+              </button>
+              <button className={styles.modalBtnDanger} onClick={handleCancelarLista}>
                 Sí, cancelar
               </button>
             </div>
@@ -236,36 +379,36 @@ function CitaCard({ cita, onConfirmar, onCancelar }: {
   );
 }
 
-function ListaEsperaCard({ datos }: { datos: any }) {
+function ListaEsperaCard({ datos, onCancelar }: { datos: any; onCancelar: () => void }) {
   const posicion = datos?.posicion_actual_fila ?? '—';
-  const total = datos?.total_pacientes_especialidad ?? '—';
-  const dias = datos?.tiempo_estimado_espera_dias ?? '—';
-  const especialidad = datos?.especialidad_solicitada ?? 'Especialidad';
-  const porcentaje = (typeof posicion === 'number' && typeof total === 'number' && total > 0)
-    ? Math.max(0, Math.min(100, Math.round((1 - posicion / total) * 100)))
-    : 0;
+  const esp = Array.isArray(datos?.especialidades) ? datos.especialidades[0] : datos?.especialidades;
+  const especialidad = esp?.nombre ?? 'Especialidad';
+  const recinto = Array.isArray(datos?.recintos) ? datos.recintos[0] : datos?.recintos;
 
   return (
     <div className={styles.citaInnerCard}>
       <p className={styles.listaEspecialidad}>{especialidad}</p>
 
       <div className={styles.positionRow}>
-        <span className={styles.positionLabel}>Tu posición:</span>
+        <span className={styles.positionLabel}>Tu posición en fila:</span>
         <span className={styles.positionNumber}>#{posicion}</span>
       </div>
 
-      <div className={styles.progressBarContainer}>
-        <div className={styles.progressBarFill} style={{ width: `${porcentaje}%` }} />
-      </div>
-
-      <div className={styles.progressFooter}>
-        <span className={styles.progressTotal}>Total: {total} pacientes</span>
-        <span className={styles.progressPercent}>{porcentaje}% avanzado</span>
-      </div>
+      {recinto && (
+        <p className={styles.citaLocation}>
+          <strong>Recinto:</strong> {recinto.nombre}{recinto.comuna ? ` — ${recinto.comuna}` : ''}
+        </p>
+      )}
 
       <div className={styles.timeSection}>
-        <p className={styles.timeLabel}>Tiempo estimado de espera:</p>
-        <p className={styles.timeValue}>~ {dias} días</p>
+        <p className={styles.timeLabel}>Estado:</p>
+        <p className={styles.timeValue} style={{ fontSize: '14px', color: '#f59e0b' }}>En espera de asignación</p>
+      </div>
+
+      <div className={styles.btnGroup}>
+        <button className={styles.btnCancel} onClick={onCancelar}>
+          Cancelar solicitud
+        </button>
       </div>
     </div>
   );

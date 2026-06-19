@@ -202,12 +202,27 @@
   letter-spacing: 0.04em;
 }
 
+.citaLabelPaciente {
+  margin: 0 0 2px 0;
+  font-size: 10px;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
 .citaPaciente {
-  margin: 0 0 6px 0;
+  margin: 0 0 2px 0;
   font-size: 13px;
   font-weight: 600;
   color: #0f172a;
   text-transform: capitalize;
+}
+
+.citaRut {
+  margin: 0 0 6px 0;
+  font-size: 11px;
+  color: #64748b;
 }
 
 .citaDetalle {
@@ -558,7 +573,12 @@
   width: 100%;
 }
 
-.calDia:hover { background-color: #f0f9ff; }
+.calDia:hover:not(:disabled) { background-color: #f0f9ff; }
+
+.calDiaPasado {
+  color: #cbd5e1;
+  cursor: not-allowed;
+}
 
 .calDiaHoy {
   color: #0044b1;

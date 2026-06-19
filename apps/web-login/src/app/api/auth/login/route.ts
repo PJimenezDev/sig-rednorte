@@ -35,17 +35,25 @@ export async function POST(req: NextRequest) {
     .maybeSingle();
 
   const meta = data.user.user_metadata ?? {};
-  const nombreStaff = medico?.nombre ?? meta.nombre ?? email.split('@')[0];
-  const apellidoStaff = medico?.apellido ?? meta.apellido ?? null;
-  const rutStaff = medico?.rut ?? meta.rut ?? null;
+
+  if (medico) {
+    return NextResponse.json({
+      access_token: data.session.access_token,
+      refresh_token: data.session.refresh_token,
+      role: 'medico',
+      nombre: medico.nombre ?? meta.nombre ?? email.split('@')[0],
+      apellido: medico.apellido ?? meta.apellido ?? null,
+      rut: medico.rut ?? meta.rut ?? null,
+    });
+  }
 
   return NextResponse.json({
     access_token: data.session.access_token,
     refresh_token: data.session.refresh_token,
-    role: 'staff',
-    nombre: nombreStaff,
-    apellido: apellidoStaff,
-    rut: rutStaff,
+    role: 'recepcionista',
+    nombre: meta.nombre ?? email.split('@')[0],
+    apellido: meta.apellido ?? null,
+    rut: meta.rut ?? null,
   });
 }
 

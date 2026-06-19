@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@sig-rednorte/database';
+import { createServerClient, getSupabaseAdmin } from '@sig-rednorte/database';
 
 export async function GET(req: NextRequest) {
   const token = req.headers.get('Authorization')?.replace('Bearer ', '');
@@ -17,12 +17,14 @@ export async function GET(req: NextRequest) {
 
   if (!paciente) return NextResponse.json({ error: 'Paciente no encontrado' }, { status: 404 });
 
+  const admin = getSupabaseAdmin();
+
   const [{ data: listaEspera }, { data: citas }] = await Promise.all([
-    supabase
+    admin
       .from('lista_espera')
-      .select('posicion_actual_fila, total_pacientes_especialidad, tiempo_estimado_espera_dias, especialidad_solicitada')
+      .select('id, posicion_actual_fila, especialidades:especialidad_id(nombre), recintos(nombre, comuna)')
       .eq('paciente_id', paciente.id),
-    supabase
+    admin
       .from('citas')
       .select('id, estado, agendas(id, fecha_hora_inicio, medicos(nombre, apellido, recintos(nombre, comuna)))')
       .eq('paciente_id', paciente.id)

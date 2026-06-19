@@ -41,6 +41,12 @@ export default function DashboardRecepcionista() {
   const [agendarError, setAgendarError] = useState<string | null>(null);
   const [agendarLoading, setAgendarLoading] = useState(false);
 
+  const [modalAsignar, setModalAsignar] = useState<{ pacienteId: string; listaEsperaId: string; nombrePaciente: string } | null>(null);
+  const [asignarFecha, setAsignarFecha] = useState('');
+  const [asignarHora, setAsignarHora] = useState('');
+  const [asignarError, setAsignarError] = useState<string | null>(null);
+  const [asignarLoading, setAsignarLoading] = useState(false);
+
   const router = useRouter();
 
   useEffect(() => {
@@ -74,6 +80,48 @@ export default function DashboardRecepcionista() {
   const handleLogout = () => {
     sessionStorage.clear();
     router.push('/login');
+  };
+
+  const abrirModalAsignar = (entrada: any) => {
+    const p = Array.isArray(entrada.pacientes) ? entrada.pacientes[0] : entrada.pacientes;
+    const nombrePaciente = p
+      ? `${p.nombre} ${p.apellido_paterno ?? ''} ${p.apellido_materno ?? ''}`.trim()
+      : 'Paciente';
+    setModalAsignar({ pacienteId: p?.id, listaEsperaId: entrada.id, nombrePaciente });
+    setAsignarFecha('');
+    setAsignarHora('');
+    setAsignarError(null);
+  };
+
+  const handleAsignarCita = async () => {
+    if (!asignarFecha || !asignarHora) { setAsignarError('Selecciona fecha y hora.'); return; }
+    if (!modalAsignar) return;
+    const token = sessionStorage.getItem('access_token');
+    if (!token) return;
+    setAsignarLoading(true);
+    setAsignarError(null);
+    try {
+      const res = await fetch(`${API}/api/medico/asignar-cita`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          rutMedico: rut,
+          pacienteId: modalAsignar.pacienteId,
+          listaEsperaId: modalAsignar.listaEsperaId,
+          fecha: asignarFecha,
+          hora: asignarHora,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setAsignarError(data.error ?? 'Error al asignar.'); return; }
+      setModalAsignar(null);
+      const t = sessionStorage.getItem('access_token')!;
+      fetchDashboard(t);
+    } catch {
+      setAsignarError('Error de conexión.');
+    } finally {
+      setAsignarLoading(false);
+    }
   };
 
   const abrirModal = async () => {
@@ -210,7 +258,7 @@ export default function DashboardRecepcionista() {
             ) : (
               <div className={styles.listaList}>
                 {listaEspera.map((entrada: any) => (
-                  <ListaItem key={entrada.id} datos={entrada} total={listaEspera.length} />
+                  <ListaItem key={entrada.id} datos={entrada} total={listaEspera.length} onAsignar={abrirModalAsignar} />
                 ))}
               </div>
             )}
@@ -291,6 +339,48 @@ export default function DashboardRecepcionista() {
           </div>
         </div>
       )}
+
+      {modalAsignar && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalBox}>
+            <div className={styles.modalHeader}>
+              <h3 className={styles.modalTitle}>Asignarme esta cita</h3>
+              <button type="button" className={styles.modalClose} onClick={() => setModalAsignar(null)}>×</button>
+            </div>
+            <p style={{ margin: '0 0 16px 0', fontSize: '13px', color: '#475569' }}>
+              Paciente: <strong>{modalAsignar.nombrePaciente}</strong>
+            </p>
+            <div className={styles.formRow}>
+              <label className={styles.formLabel}>Fecha:</label>
+              <input
+                className={styles.formInput}
+                type="date"
+                min={new Date().toISOString().split('T')[0]}
+                value={asignarFecha}
+                onChange={e => setAsignarFecha(e.target.value)}
+              />
+            </div>
+            <div className={styles.formRow}>
+              <label className={styles.formLabel}>Hora:</label>
+              <input
+                className={styles.formInput}
+                type="time"
+                value={asignarHora}
+                onChange={e => setAsignarHora(e.target.value)}
+              />
+            </div>
+            {asignarError && <p className={styles.formError}>{asignarError}</p>}
+            <div className={styles.modalBtnGroup}>
+              <button type="button" className={styles.btnConfirmarCita} onClick={handleAsignarCita} disabled={asignarLoading}>
+                {asignarLoading ? 'Asignando...' : 'Confirmar cita'}
+              </button>
+              <button type="button" className={styles.btnCancelarCita} onClick={() => setModalAsignar(null)}>
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -341,7 +431,7 @@ function CitaItem({ cita }: { cita: any }) {
   );
 }
 
-function ListaItem({ datos, total }: { datos: any; total: number }) {
+function ListaItem({ datos, total, onAsignar }: { datos: any; total: number; onAsignar: (entrada: any) => void }) {
   const especialidad = Array.isArray(datos.especialidades) ? datos.especialidades[0] : datos.especialidades;
   const posicion = datos.posicion_actual_fila ?? 0;
   const porcentaje = total > 0 ? Math.max(0, Math.min(100, Math.round((1 - posicion / total) * 100))) : 0;
@@ -353,9 +443,21 @@ function ListaItem({ datos, total }: { datos: any; total: number }) {
     baja: 'Baja',
   };
 
+  const paciente = Array.isArray(datos.pacientes) ? datos.pacientes[0] : datos.pacientes;
+  const nombrePaciente = paciente
+    ? `${paciente.nombre} ${paciente.apellido_paterno ?? ''} ${paciente.apellido_materno ?? ''}`.trim()
+    : null;
+
   return (
     <div className={styles.listaItem}>
       <p className={styles.listaEspecialidad}>{especialidad?.nombre || 'Especialidad'}</p>
+      {nombrePaciente && (
+        <>
+          <p className={styles.citaLabelPaciente}>Paciente</p>
+          <p className={styles.citaPaciente}>{nombrePaciente}</p>
+          {paciente?.rut && <p className={styles.citaRut}>RUT: {paciente.rut}</p>}
+        </>
+      )}
       <p className={styles.listaPrioridad}>
         <strong>Prioridad:</strong> {prioridadLabel[datos.gravedad] ?? datos.gravedad ?? '—'}
       </p>
@@ -366,6 +468,9 @@ function ListaItem({ datos, total }: { datos: any; total: number }) {
         <span className={styles.progressTotal}>Total: {total} pacientes</span>
         <span className={styles.progressPercent}>{porcentaje}% avanzado</span>
       </div>
+      <button className={styles.btnAgendar} style={{ marginTop: '10px' }} onClick={() => onAsignar(datos)}>
+        Asignarme esta cita
+      </button>
     </div>
   );
 }

@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
       .order('created_at', { ascending: false }),
     admin
       .from('lista_espera')
-      .select('id, posicion_actual_fila, gravedad, especialidades(nombre)')
+      .select('id, posicion_actual_fila, gravedad, especialidades(nombre), pacientes:paciente_id(id, nombre, apellido_paterno, apellido_materno, rut)')
       .order('posicion_actual_fila'),
   ]);
 

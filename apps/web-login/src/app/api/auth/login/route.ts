@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase, createServerClient } from '@sig-rednorte/database';
+import { supabase, createServerClient, getSupabaseAdmin } from '@sig-rednorte/database';
 
 export async function POST(req: NextRequest) {
   const { email, password } = await req.json();
@@ -9,9 +9,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Credenciales incorrectas' }, { status: 401 });
   }
 
-  const sc = createServerClient(data.session.access_token);
+  const admin = getSupabaseAdmin();
 
-  const { data: paciente } = await sc
+  const { data: paciente } = await admin
     .from('pacientes')
     .select('id, nombre, apellido_paterno, apellido_materno')
     .eq('correo', email.toLowerCase())
@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  const { data: medico } = await sc
+  const { data: medico } = await admin
     .from('medicos')
     .select('id, nombre, apellido, rut')
     .eq('correo', email.toLowerCase())

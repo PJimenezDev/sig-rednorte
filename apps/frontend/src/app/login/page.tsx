@@ -41,6 +41,8 @@ export default function LoginPage() {
 
       if (role === 'paciente') {
         router.push('/pacientes');
+      } else if (role === 'medico') {
+        router.push('/medico');
       } else {
         router.push('/recepcionista');
       }

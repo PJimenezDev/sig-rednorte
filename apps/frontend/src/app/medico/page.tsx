@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './page.module.css';
 
-const API = process.env.NEXT_PUBLIC_API_RECEPCIONISTA ?? 'http://localhost:3021';
+const API = process.env.NEXT_PUBLIC_API_MEDICO ?? 'http://localhost:3023';
 
 const formatearRut = (valor: string): string => {
   const limpio = valor.replace(/[^0-9kK-]/g, '');
@@ -20,37 +20,20 @@ const rutTieneFormato = (rut: string): boolean => {
   return partes.length === 2 && partes[0].length > 0 && partes[1].length === 1;
 };
 
-interface Medico {
-  id: string;
-  nombre: string;
-  apellido: string;
-  rut: string;
-  especialidad_id: string;
-  especialidades: any;
-  recintos: any;
-}
-
-export default function DashboardRecepcionista() {
-  const [nombre, setNombre] = useState<string>('Recepcionista');
+export default function DashboardMedico() {
+  const [nombre, setNombre] = useState<string>('Médico');
   const [rut, setRut] = useState<string>('—');
   const [citas, setCitas] = useState<any[]>([]);
   const [listaEspera, setListaEspera] = useState<any[]>([]);
-  const [medicos, setMedicos] = useState<Medico[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [modalAgendar, setModalAgendar] = useState(false);
-  const [medicoSelId, setMedicoSelId] = useState('');
+  const [especialidadMedico, setEspecialidadMedico] = useState('');
   const [formCita, setFormCita] = useState({ rutPaciente: '', rutMedico: '', fecha: '', hora: '' });
   const [agendarError, setAgendarError] = useState<string | null>(null);
   const [agendarLoading, setAgendarLoading] = useState(false);
 
-  const [modalAsignar, setModalAsignar] = useState<{
-    pacienteId: string;
-    listaEsperaId: string;
-    nombrePaciente: string;
-    especialidadId: string;
-  } | null>(null);
-  const [asignarMedicoRut, setAsignarMedicoRut] = useState('');
+  const [modalAsignar, setModalAsignar] = useState<{ pacienteId: string; listaEsperaId: string; nombrePaciente: string } | null>(null);
   const [asignarFecha, setAsignarFecha] = useState('');
   const [asignarHora, setAsignarHora] = useState('');
   const [asignarError, setAsignarError] = useState<string | null>(null);
@@ -67,13 +50,12 @@ export default function DashboardRecepcionista() {
     const r = sessionStorage.getItem('rut_usuario');
     if (r) setRut(r);
 
-    fetchDashboard(token);
-    fetchMedicos(token);
+    fetchDashboard(token, r ?? '');
   }, []);
 
-  const fetchDashboard = async (token: string) => {
+  const fetchDashboard = async (token: string, rutMedico: string) => {
     try {
-      const res = await fetch(`${API}/api/recepcionista/dashboard`, {
+      const res = await fetch(`${API}/api/medico/dashboard?rut=${encodeURIComponent(rutMedico)}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.status === 401) { router.push('/login'); return; }
@@ -87,26 +69,9 @@ export default function DashboardRecepcionista() {
     }
   };
 
-  const fetchMedicos = async (token: string) => {
-    try {
-      const res = await fetch(`${API}/api/recepcionista/medicos`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      setMedicos(data.medicos ?? []);
-    } catch {
-      setMedicos([]);
-    }
-  };
-
   const handleLogout = () => {
     sessionStorage.clear();
     router.push('/login');
-  };
-
-  const getMedicoEspecialidad = (m: Medico): string => {
-    const esp = Array.isArray(m.especialidades) ? m.especialidades[0] : m.especialidades;
-    return esp?.nombre ?? '';
   };
 
   const abrirModalAsignar = (entrada: any) => {
@@ -114,23 +79,17 @@ export default function DashboardRecepcionista() {
     const nombrePaciente = p
       ? `${p.nombre} ${p.apellido_paterno ?? ''} ${p.apellido_materno ?? ''}`.trim()
       : 'Paciente';
-    setModalAsignar({
-      pacienteId: p?.id,
-      listaEsperaId: entrada.id,
-      nombrePaciente,
-      especialidadId: entrada.especialidad_id ?? '',
-    });
-    setAsignarMedicoRut('');
+    setModalAsignar({ pacienteId: p?.id, listaEsperaId: entrada.id, nombrePaciente });
     setAsignarFecha('');
     setAsignarHora('');
     setAsignarError(null);
   };
 
   const handleAsignarCita = async () => {
-    if (!asignarMedicoRut) { setAsignarError('Selecciona un médico.'); return; }
     if (!asignarFecha || !asignarHora) { setAsignarError('Selecciona fecha y hora.'); return; }
     if (!modalAsignar) return;
     const token = sessionStorage.getItem('access_token');
+    const rutSesion = sessionStorage.getItem('rut_usuario');
     if (!token) return;
     setAsignarLoading(true);
     setAsignarError(null);
@@ -139,7 +98,7 @@ export default function DashboardRecepcionista() {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          rutMedico: asignarMedicoRut,
+          rutMedico: rutSesion,
           pacienteId: modalAsignar.pacienteId,
           listaEsperaId: modalAsignar.listaEsperaId,
           fecha: asignarFecha,
@@ -149,7 +108,7 @@ export default function DashboardRecepcionista() {
       const data = await res.json();
       if (!res.ok) { setAsignarError(data.error ?? 'Error al asignar.'); return; }
       setModalAsignar(null);
-      fetchDashboard(sessionStorage.getItem('access_token')!);
+      fetchDashboard(token, rutSesion ?? '');
     } catch {
       setAsignarError('Error de conexión.');
     } finally {
@@ -157,22 +116,30 @@ export default function DashboardRecepcionista() {
     }
   };
 
-  const abrirModal = () => {
-    setMedicoSelId('');
-    setFormCita({ rutPaciente: '', rutMedico: '', fecha: '', hora: '' });
+  const abrirModal = async () => {
+    const rutActual = sessionStorage.getItem('rut_usuario') ?? '';
+    setFormCita({ rutPaciente: '', rutMedico: rutActual, fecha: '', hora: '' });
     setAgendarError(null);
+    setEspecialidadMedico('');
     setModalAgendar(true);
-  };
 
-  const handleSeleccionarMedico = (id: string) => {
-    setMedicoSelId(id);
-    const m = medicos.find(m => m.id === id);
-    setFormCita(f => ({ ...f, rutMedico: m?.rut ?? '' }));
+    const token = sessionStorage.getItem('access_token');
+    if (!token) return;
+    try {
+      const res = await fetch(
+        `${API}/api/medico/mi-especialidad?rut=${encodeURIComponent(rutActual)}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      const data = await res.json();
+      setEspecialidadMedico(data.especialidad?.nombre ?? '');
+    } catch {
+      setEspecialidadMedico('');
+    }
   };
 
   const handleAgendarCita = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formCita.rutPaciente || !medicoSelId || !formCita.fecha || !formCita.hora) {
+    if (!formCita.rutPaciente || !formCita.fecha || !formCita.hora) {
       setAgendarError('Complete todos los campos obligatorios.');
       return;
     }
@@ -185,7 +152,7 @@ export default function DashboardRecepcionista() {
     setAgendarLoading(true);
     setAgendarError(null);
     try {
-      const res = await fetch(`${API}/api/recepcionista/citas`, {
+      const res = await fetch(`${API}/api/medico/citas`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
@@ -198,7 +165,7 @@ export default function DashboardRecepcionista() {
       const data = await res.json();
       if (!res.ok) { setAgendarError(data.error ?? 'Error al agendar la cita.'); return; }
       setModalAgendar(false);
-      fetchDashboard(token);
+      fetchDashboard(token, formCita.rutMedico);
     } catch {
       setAgendarError('Error de conexión. Intente nuevamente.');
     } finally {
@@ -217,11 +184,6 @@ export default function DashboardRecepcionista() {
   const citasConfirmadas = citas.filter(c => c.estado === 'confirmada').length;
   const notificaciones = citas.filter(c => c.estado === 'asignada').length;
 
-  const medicoSeleccionado = medicos.find(m => m.id === medicoSelId);
-  const medicosFiltradosAsignar = modalAsignar
-    ? medicos.filter(m => m.especialidad_id === modalAsignar.especialidadId)
-    : [];
-
   return (
     <div className={styles.pageWrapper}>
       <header className={styles.header}>
@@ -231,7 +193,7 @@ export default function DashboardRecepcionista() {
           </div>
           <div>
             <p className={styles.logoTitle}>RedNorte Salud</p>
-            <p className={styles.logoSubtitle}>Panel Recepcionista</p>
+            <p className={styles.logoSubtitle}>Panel Médico</p>
           </div>
         </div>
         <div className={styles.headerRight}>
@@ -245,7 +207,7 @@ export default function DashboardRecepcionista() {
 
       <main className={styles.main}>
         <h2 className={styles.welcomeTitle}>Bienvenido al Portal</h2>
-        <p className={styles.welcomeSubtitle}>Gestiona las citas médicas y el estado de las listas de espera de todos los pacientes.</p>
+        <p className={styles.welcomeSubtitle}>Gestiona tus citas y los pacientes en espera de tu especialidad.</p>
 
         <div className={styles.kpiGrid}>
           <KpiCard label="Citas Confirmadas" valor={citasConfirmadas} valueClass={styles.kpiValueBlue} />
@@ -255,9 +217,9 @@ export default function DashboardRecepcionista() {
 
         <div className={styles.contentGrid}>
           <section className={styles.card}>
-            <h3 className={styles.sectionTitle}>Citas Médicas</h3>
+            <h3 className={styles.sectionTitle}>Mis Citas Médicas</h3>
             {citas.length === 0 ? (
-              <p className={styles.emptyState}>No hay citas programadas.</p>
+              <p className={styles.emptyState}>No tienes citas programadas.</p>
             ) : (
               <div className={styles.citasList}>
                 {citas.map((cita: any) => (
@@ -271,7 +233,7 @@ export default function DashboardRecepcionista() {
           <section className={styles.card}>
             <h3 className={styles.sectionTitle}>Lista de Espera</h3>
             {listaEspera.length === 0 ? (
-              <p className={styles.emptyState}>No hay pacientes en lista de espera.</p>
+              <p className={styles.emptyState}>No hay pacientes en espera para tu especialidad.</p>
             ) : (
               <div className={styles.listaList}>
                 {listaEspera.map((entrada: any) => (
@@ -302,26 +264,13 @@ export default function DashboardRecepcionista() {
                 />
               </div>
               <div className={styles.formRow}>
-                <label className={styles.formLabel}>Médico:</label>
-                <select
-                  className={styles.formSelect}
-                  value={medicoSelId}
-                  onChange={e => handleSeleccionarMedico(e.target.value)}
-                >
-                  <option value="">Selecciona un médico</option>
-                  {medicos.map(m => (
-                    <option key={m.id} value={m.id}>
-                      Dr/a {m.nombre} {m.apellido} — {getMedicoEspecialidad(m)}
-                    </option>
-                  ))}
-                </select>
+                <label className={styles.formLabel}>Especialidad médica:</label>
+                <input className={styles.formInputReadonly} type="text" value={especialidadMedico || 'Cargando...'} readOnly />
               </div>
-              {medicoSeleccionado && (
-                <div className={styles.formRow}>
-                  <label className={styles.formLabel}>Especialidad:</label>
-                  <input className={styles.formInputReadonly} type="text" value={getMedicoEspecialidad(medicoSeleccionado)} readOnly />
-                </div>
-              )}
+              <div className={styles.formRow}>
+                <label className={styles.formLabel}>RUT doctor:</label>
+                <input className={styles.formInputReadonly} type="text" value={formCita.rutMedico} readOnly />
+              </div>
               <div className={styles.formRowFechaHora}>
                 <div className={styles.formColFecha}>
                   <label className={styles.formLabel}>Fecha:</label>
@@ -350,27 +299,12 @@ export default function DashboardRecepcionista() {
         <div className={styles.modalOverlay}>
           <div className={styles.modalBox}>
             <div className={styles.modalHeader}>
-              <h3 className={styles.modalTitle}>Asignar cita</h3>
+              <h3 className={styles.modalTitle}>Asignarme esta cita</h3>
               <button type="button" className={styles.modalClose} onClick={() => setModalAsignar(null)}>×</button>
             </div>
             <p style={{ margin: '0 0 16px 0', fontSize: '13px', color: '#475569' }}>
               Paciente: <strong>{modalAsignar.nombrePaciente}</strong>
             </p>
-            <div className={styles.formRow}>
-              <label className={styles.formLabel}>Médico:</label>
-              <select
-                className={styles.formSelect}
-                value={asignarMedicoRut}
-                onChange={e => setAsignarMedicoRut(e.target.value)}
-              >
-                <option value="">Selecciona un médico</option>
-                {medicosFiltradosAsignar.map(m => (
-                  <option key={m.id} value={m.rut}>
-                    Dr/a {m.nombre} {m.apellido}
-                  </option>
-                ))}
-              </select>
-            </div>
             <div className={styles.formRow}>
               <label className={styles.formLabel}>Fecha:</label>
               <input className={styles.formInput} type="date" min={new Date().toISOString().split('T')[0]} value={asignarFecha} onChange={e => setAsignarFecha(e.target.value)} />
@@ -468,7 +402,7 @@ function ListaItem({ datos, total, onAsignar }: { datos: any; total: number; onA
         <span className={styles.progressPercent}>{porcentaje}% avanzado</span>
       </div>
       <button className={styles.btnAgendar} style={{ marginTop: '10px' }} onClick={() => onAsignar(datos)}>
-        Asignar cita
+        Asignarme esta cita
       </button>
     </div>
   );

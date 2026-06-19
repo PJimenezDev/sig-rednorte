@@ -20,11 +20,6 @@ const rutTieneFormato = (rut: string): boolean => {
   return partes.length === 2 && partes[0].length > 0 && partes[1].length === 1;
 };
 
-interface Especialidad {
-  id: string;
-  nombre: string;
-}
-
 interface FormCita {
   rutPaciente: string;
   ramaMedicina: string;
@@ -41,7 +36,7 @@ export default function DashboardRecepcionista() {
   const [loading, setLoading] = useState(true);
 
   const [modalAgendar, setModalAgendar] = useState(false);
-  const [especialidades, setEspecialidades] = useState<Especialidad[]>([]);
+  const [especialidadMedico, setEspecialidadMedico] = useState<string>('');
   const [formCita, setFormCita] = useState<FormCita>({ rutPaciente: '', ramaMedicina: '', rutMedico: '', fecha: '', hora: '' });
   const [agendarError, setAgendarError] = useState<string | null>(null);
   const [agendarLoading, setAgendarLoading] = useState(false);
@@ -85,19 +80,21 @@ export default function DashboardRecepcionista() {
     const rutActual = sessionStorage.getItem('rut_usuario') ?? '';
     setFormCita({ rutPaciente: '', ramaMedicina: '', rutMedico: rutActual, fecha: '', hora: '' });
     setAgendarError(null);
+    setEspecialidadMedico('');
     setModalAgendar(true);
 
     const token = sessionStorage.getItem('access_token');
     if (!token) return;
 
     try {
-      const res = await fetch(`${API}/api/recepcionista/especialidades`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await fetch(
+        `${API}/api/recepcionista/mi-especialidad?rut=${encodeURIComponent(rutActual)}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
       const data = await res.json();
-      setEspecialidades(data.especialidades ?? []);
+      setEspecialidadMedico(data.especialidad?.nombre ?? '');
     } catch {
-      setEspecialidades([]);
+      setEspecialidadMedico('');
     }
   };
 
@@ -242,17 +239,13 @@ export default function DashboardRecepcionista() {
               </div>
 
               <div className={styles.formRow}>
-                <label className={styles.formLabel}>ramaMedicina</label>
-                <select
-                  className={styles.formSelect}
-                  value={formCita.ramaMedicina}
-                  onChange={e => setFormCita(f => ({ ...f, ramaMedicina: e.target.value }))}
-                >
-                  <option value="">Seleccione especialización</option>
-                  {especialidades.map(esp => (
-                    <option key={esp.id} value={esp.id}>{esp.nombre}</option>
-                  ))}
-                </select>
+                <label className={styles.formLabel}>Especialidad médica:</label>
+                <input
+                  className={styles.formInputReadonly}
+                  type="text"
+                  value={especialidadMedico || 'Cargando...'}
+                  readOnly
+                />
               </div>
 
               <div className={styles.formRow}>
@@ -328,16 +321,20 @@ function CitaItem({ cita }: { cita: any }) {
     }
   }
 
+  const nombrePaciente = paciente
+    ? `${paciente.nombre} ${paciente.apellido_paterno}${paciente.apellido_materno ? ` ${paciente.apellido_materno}` : ''}`
+    : '—';
+
   return (
     <div className={styles.citaItem}>
       <div className={styles.badgeRow}>
         {cita.estado === 'asignada' && <span className={styles.badgeAsignada}>Por confirmar</span>}
         {cita.estado === 'confirmada' && <span className={styles.badgeConfirmada}>Confirmada</span>}
       </div>
+      <p className={styles.citaLabelPaciente}>Paciente</p>
+      <p className={styles.citaPaciente}>{nombrePaciente}</p>
+      {paciente?.rut && <p className={styles.citaRut}>RUT: {paciente.rut}</p>}
       <p className={styles.citaEspecialidad}>{especialidad?.nombre || 'Especialidad'}</p>
-      <p className={styles.citaPaciente}>
-        {paciente ? `${paciente.nombre} ${paciente.apellido_paterno} ${paciente.apellido_materno}` : '—'}
-      </p>
       <p className={styles.citaDetalle}><strong>Fecha:</strong> {fechaTexto} — {horaTexto} hrs</p>
       <p className={styles.citaLugar}><strong>Lugar:</strong> {recinto?.nombre || '—'}{recinto?.comuna ? ` (${recinto.comuna})` : ''}</p>
     </div>
@@ -420,12 +417,14 @@ function CalendarioMini({ selectedDate, onSelect }: { selectedDate: string; onSe
           const dateStr = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
           const esSel = dateStr === selectedDate;
           const esHoy = dia === hoy.getDate() && viewMonth === hoy.getMonth() && viewYear === hoy.getFullYear();
+          const esPasado = new Date(viewYear, viewMonth, dia) < new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
           return (
             <button
               key={dia}
               type="button"
-              onClick={() => seleccionarDia(dia)}
-              className={`${styles.calDia} ${esSel ? styles.calDiaSel : ''} ${esHoy && !esSel ? styles.calDiaHoy : ''}`}
+              onClick={() => !esPasado && seleccionarDia(dia)}
+              disabled={esPasado}
+              className={`${styles.calDia} ${esSel ? styles.calDiaSel : ''} ${esHoy && !esSel ? styles.calDiaHoy : ''} ${esPasado ? styles.calDiaPasado : ''}`}
             >
               {dia}
             </button>

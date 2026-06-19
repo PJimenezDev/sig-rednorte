@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient, getSupabaseAdmin } from '@sig-rednorte/database';
 
+const cleanRut = (rut: string) => rut.trim().replace(/[^0-9kK]/g, '').toLowerCase();
+
 export async function GET(req: NextRequest) {
   const token = req.headers.get('Authorization')?.replace('Bearer ', '');
   if (!token) return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
@@ -9,20 +11,24 @@ export async function GET(req: NextRequest) {
   const { data: { user }, error: userError } = await supabase.auth.getUser();
   if (userError || !user) return NextResponse.json({ error: 'Token inválido' }, { status: 401 });
 
+  const rut = req.nextUrl.searchParams.get('rut');
+  if (!rut) return NextResponse.json({ error: 'RUT requerido' }, { status: 400 });
+
   const admin = getSupabaseAdmin();
 
-  const [{ data: citas }, { data: listaEspera }] = await Promise.all([
-    admin
-      .from('citas')
-      .select('id, estado, paciente:paciente_id(nombre, apellido_paterno, apellido_materno, rut), agendas(id, fecha_hora_inicio, medicos(nombre, apellido, recintos(nombre, comuna), especialidades(nombre)))')
-      .order('created_at', { ascending: false }),
-    admin
-      .from('lista_espera')
-      .select('id, posicion_actual_fila, gravedad, especialidades(nombre)')
-      .order('posicion_actual_fila'),
-  ]);
+  const { data: medicos } = await admin
+    .from('medicos')
+    .select('id, rut, especialidades(id, nombre)');
 
-  return NextResponse.json({ citas: citas ?? [], listaEspera: listaEspera ?? [] });
+  const medico = medicos?.find((m: any) => cleanRut(m.rut) === cleanRut(rut));
+
+  if (!medico) return NextResponse.json({ error: 'Médico no encontrado' }, { status: 404 });
+
+  const especialidad = Array.isArray(medico.especialidades)
+    ? medico.especialidades[0]
+    : medico.especialidades;
+
+  return NextResponse.json({ especialidad: especialidad ?? null });
 }
 
 export async function OPTIONS() {

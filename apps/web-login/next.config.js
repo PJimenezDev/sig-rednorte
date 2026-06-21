@@ -1,3 +1,5 @@
+// Next.js configuration file for the web-recepcionista application. It sets up CORS headers for API routes to allow requests from the specified origin (http://localhost:3010).
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   async headers() {

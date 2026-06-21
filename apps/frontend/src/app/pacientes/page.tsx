@@ -1,11 +1,15 @@
 'use client';
 
+// Página principal del paciente en el portal de RedNorte Salud. Permite a los pacientes ver sus citas médicas programadas, su posición en las listas de espera, y gestionar sus solicitudes de hora médica. El paciente puede confirmar o cancelar sus citas, así como solicitar nuevas horas médicas seleccionando la especialidad y el recinto donde desea ser atendido. La página también muestra indicadores clave de rendimiento (KPI) para que el paciente pueda tener una visión general de su situación actual en el sistema de salud.
+
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './page.module.css';
 
+// API es la URL base para la API de pacientes. Se obtiene de las variables de entorno, con un valor predeterminado de 'http://localhost:3020' si no se ha definido.
 const API = process.env.NEXT_PUBLIC_API_PACIENTES ?? 'http://localhost:3020';
 
+// DashboardPaciente es el componente principal que representa la página de inicio del paciente. Carga los datos del paciente, incluyendo sus citas médicas y su posición en las listas de espera, al montar el componente. Permite al paciente confirmar o cancelar sus citas, así como solicitar nuevas horas médicas. También muestra indicadores clave de rendimiento (KPI) para que el paciente pueda tener una visión general de su situación actual en el sistema de salud.
 export default function DashboardPaciente() {
   const [nombre, setNombre] = useState<string>('Paciente');
   const [rut, setRut] = useState<string>('—');
@@ -122,6 +126,7 @@ export default function DashboardPaciente() {
     }
   };
 
+  // handleSolicitarHora es una función que se ejecuta cuando el paciente confirma su solicitud de hora médica. Verifica que se haya seleccionado una especialidad y un recinto, y luego realiza una solicitud POST a la API para solicitar la hora médica. Si la solicitud es exitosa, cierra el modal de solicitud y actualiza el dashboard del paciente para reflejar los cambios. Si ocurre un error, muestra un mensaje de error adecuado.
   const handleSolicitarHora = async () => {
     if (!especialidadSel) { setSolicitarError('Selecciona una especialidad.'); return; }
     if (!recintoSel) { setSolicitarError('Selecciona un recinto.'); return; }
@@ -157,6 +162,7 @@ export default function DashboardPaciente() {
   const citasConfirmadas = citas.filter((c: any) => c.estado === 'confirmada').length;
   const notificaciones = citas.filter((c: any) => c.estado === 'asignada').length;
 
+  // El componente devuelve la estructura visual de la página de inicio del paciente, que incluye un encabezado con el logo y la información del usuario, un área principal con indicadores clave de rendimiento (KPI) y secciones para mostrar las citas médicas programadas y el estado en las listas de espera. También incluye modales para confirmar la cancelación de citas y solicitudes, así como un modal para solicitar nuevas horas médicas. Además, muestra mensajes de toast para informar al usuario sobre acciones exitosas o errores durante el proceso.
   return (
     <div className={styles.pageWrapper}>
       <header className={styles.header}>
@@ -236,6 +242,7 @@ export default function DashboardPaciente() {
         </div>
       )}
 
+// Modal para solicitar hora médica, donde el paciente puede seleccionar la especialidad y el recinto donde desea ser atendido. Al confirmar la solicitud, se realiza una petición a la API para registrar la solicitud de hora médica del paciente.
       {modalSolicitar && (
         <div className={styles.modalOverlay}>
           <div className={styles.modalBox}>
@@ -318,6 +325,8 @@ export default function DashboardPaciente() {
   );
 }
 
+// KpiCard es un componente que representa una tarjeta de indicador clave de rendimiento (KPI) en el dashboard del paciente. Recibe una etiqueta, un valor numérico y una clase de estilo para el valor. El componente muestra la etiqueta y el valor de manera destacada, utilizando estilos para diferenciar visualmente los diferentes tipos de KPI (por ejemplo, citas confirmadas, pacientes en lista de espera, notificaciones). Este componente se utiliza para proporcionar al paciente una visión rápida y clara de su situación actual en el sistema de salud.
+
 function KpiCard({ label, valor, valueClass }: { label: string; valor: number; valueClass: string }) {
   return (
     <div className={styles.kpiCard}>
@@ -347,6 +356,7 @@ function CitaCard({ cita, onConfirmar, onCancelar }: {
     }
   }
 
+  // El componente CitaCard representa una tarjeta de cita médica en el dashboard del paciente. Muestra información relevante sobre la cita, como el nombre del médico, la fecha y hora de la cita, y el lugar donde se realizará. También incluye botones para confirmar o cancelar la cita, dependiendo de su estado actual. Si la cita está en estado "asignada", se muestra un botón para confirmar la cita; si ya está confirmada, se muestra un badge indicando su estado. El botón de cancelar está disponible para ambas situaciones, permitiendo al paciente gestionar sus citas de manera eficiente desde el portal.
   return (
     <div>
       <div className={styles.badgeRow}>
@@ -385,6 +395,7 @@ function ListaEsperaCard({ datos, onCancelar }: { datos: any; onCancelar: () => 
   const especialidad = esp?.nombre ?? 'Especialidad';
   const recinto = Array.isArray(datos?.recintos) ? datos.recintos[0] : datos?.recintos;
 
+  // El componente ListaEsperaCard representa una tarjeta que muestra la información de una solicitud de hora médica que se encuentra en lista de espera. Muestra la especialidad solicitada, la posición actual del paciente en la fila de espera, y el recinto donde se realizó la solicitud. También incluye un botón para cancelar la solicitud, lo que permitirá al paciente gestionar su participación en las listas de espera de manera eficiente desde el portal.
   return (
     <div className={styles.citaInnerCard}>
       <p className={styles.listaEspecialidad}>{especialidad}</p>

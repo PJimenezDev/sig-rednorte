@@ -1,10 +1,14 @@
 'use client';
 
+// Página principal del recepcionista en el portal de RedNorte Salud. Permite al recepcionista gestionar las citas médicas programadas, revisar el estado de las listas de espera, y asignar citas a los pacientes que se encuentran en lista de espera. El recepcionista puede agendar nuevas citas para los pacientes, asignar médicos a las solicitudes de hora médica en lista de espera, y visualizar indicadores clave de rendimiento (KPI) para tener una visión general del estado actual del sistema de salud desde su perspectiva.
+
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './page.module.css';
 
 const API = process.env.NEXT_PUBLIC_API_RECEPCIONISTA ?? 'http://localhost:3021';
+
+// El componente DashboardRecepcionista es el componente principal que representa la página de inicio del recepcionista. Carga los datos del dashboard, incluyendo las citas médicas programadas y las entradas en lista de espera, al montar el componente. Permite al recepcionista agendar nuevas citas para los pacientes, asignar médicos a las solicitudes de hora médica en lista de espera, y gestionar las citas médicas programadas. También muestra indicadores clave de rendimiento (KPI) para que el recepcionista pueda tener una visión general del estado actual del sistema de salud desde su perspectiva.
 
 const formatearRut = (valor: string): string => {
   const limpio = valor.replace(/[^0-9kK-]/g, '');
@@ -15,10 +19,15 @@ const formatearRut = (valor: string): string => {
   return dvLimpio ? `${cuerpoFormateado}-${dvLimpio}` : `${cuerpoFormateado}-`;
 };
 
+
+// rutTieneFormato es una función que verifica si un RUT tiene el formato correcto, es decir, que contiene un guión y un dígito verificador al final. Esta función se utiliza para validar el formato del RUT ingresado por el recepcionista al agendar una nueva cita para un paciente, asegurando que el RUT tenga la estructura adecuada antes de enviar la solicitud a la API.
+
 const rutTieneFormato = (rut: string): boolean => {
   const partes = rut.split('-');
   return partes.length === 2 && partes[0].length > 0 && partes[1].length === 1;
 };
+
+// Interfaz que representa la estructura de un médico en el sistema. Incluye información básica como el ID, nombre, apellido, RUT, especialidad y recintos asociados. Esta interfaz se utiliza para tipar los datos de los médicos que se cargan desde la API y se muestran en la página del recepcionista, permitiendo una gestión más eficiente de la información relacionada con los médicos en el sistema de salud.
 
 interface Medico {
   id: string;
@@ -29,6 +38,8 @@ interface Medico {
   especialidades: any;
   recintos: any;
 }
+
+// El componente DashboardRecepcionista es el componente principal que representa la página de inicio del recepcionista. Carga los datos del dashboard, incluyendo las citas médicas programadas y las entradas en lista de espera, al montar el componente. Permite al recepcionista agendar nuevas citas para los pacientes, asignar médicos a las solicitudes de hora médica en lista de espera, y gestionar las citas médicas programadas. También muestra indicadores clave de rendimiento (KPI) para que el recepcionista pueda tener una visión general del estado actual del sistema de salud desde su perspectiva.
 
 export default function DashboardRecepcionista() {
   const [nombre, setNombre] = useState<string>('Recepcionista');
@@ -126,6 +137,8 @@ export default function DashboardRecepcionista() {
     setAsignarError(null);
   };
 
+  // handleAsignarCita es una función que se ejecuta cuando el recepcionista confirma la asignación de una cita a un paciente que se encuentra en lista de espera. La función valida que se haya seleccionado un médico, una fecha y una hora, y luego realiza una petición a la API para asignar la cita al paciente. Si la asignación es exitosa, se cierra el modal y se actualiza el dashboard para reflejar los cambios. Si ocurre un error durante el proceso, se muestra un mensaje de error al recepcionista para que pueda tomar las acciones necesarias.
+
   const handleAsignarCita = async () => {
     if (!asignarMedicoRut) { setAsignarError('Selecciona un médico.'); return; }
     if (!asignarFecha || !asignarHora) { setAsignarError('Selecciona fecha y hora.'); return; }
@@ -214,6 +227,7 @@ export default function DashboardRecepcionista() {
     );
   }
 
+  // Cálculo de indicadores clave de rendimiento (KPI) para mostrar en el dashboard del recepcionista. Se cuentan las citas que están confirmadas y las que están asignadas (notificaciones) para proporcionar al recepcionista una visión general del estado actual de las citas médicas programadas y las solicitudes en lista de espera.
   const citasConfirmadas = citas.filter(c => c.estado === 'confirmada').length;
   const notificaciones = citas.filter(c => c.estado === 'asignada').length;
 
@@ -222,6 +236,7 @@ export default function DashboardRecepcionista() {
     ? medicos.filter(m => m.especialidad_id === modalAsignar.especialidadId)
     : [];
 
+    // El componente devuelve la estructura visual de la página de inicio del recepcionista, que incluye un encabezado con el logo y la información del usuario, un área principal con indicadores clave de rendimiento (KPI) y secciones para mostrar las citas médicas programadas y el estado en las listas de espera. También incluye modales para agendar nuevas citas y asignar médicos a las solicitudes de hora médica en lista de espera, permitiendo al recepcionista gestionar eficientemente las citas médicas desde su perspectiva en el sistema de salud.
   return (
     <div className={styles.pageWrapper}>
       <header className={styles.header}>
@@ -395,6 +410,8 @@ export default function DashboardRecepcionista() {
   );
 }
 
+// El componente KpiCard es un componente reutilizable que se utiliza para mostrar indicadores clave de rendimiento (KPI) en el dashboard del recepcionista. Recibe una etiqueta, un valor numérico y una clase de estilo para el valor, y muestra esta información de manera visualmente destacada. Este componente se utiliza para mostrar métricas importantes como el número de citas confirmadas, pacientes en lista de espera y notificaciones, proporcionando al recepcionista una visión rápida del estado actual del sistema de salud desde su perspectiva.
+
 function KpiCard({ label, valor, valueClass }: { label: string; valor: number; valueClass: string }) {
   return (
     <div className={styles.kpiCard}>
@@ -403,6 +420,8 @@ function KpiCard({ label, valor, valueClass }: { label: string; valor: number; v
     </div>
   );
 }
+
+// El componente CitaItem representa un elemento individual de la lista de citas médicas programadas en el dashboard del recepcionista. Muestra información detallada sobre cada cita, incluyendo el nombre del paciente, su RUT, la especialidad médica, la fecha y hora de la cita, y el lugar donde se llevará a cabo. También muestra un badge que indica el estado de la cita (por confirmar o confirmada). Este componente ayuda al recepcionista a visualizar rápidamente los detalles de cada cita médica programada y gestionar eficientemente las citas desde su perspectiva en el sistema de salud.
 
 function CitaItem({ cita }: { cita: any }) {
   const agenda = Array.isArray(cita.agendas) ? cita.agendas[0] : cita.agendas;
@@ -420,6 +439,8 @@ function CitaItem({ cita }: { cita: any }) {
       horaTexto = d.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit', hour12: false });
     }
   }
+
+  // Formateo del nombre completo del paciente, incluyendo el nombre, apellido paterno y apellido materno (si existe). Si no se encuentra información del paciente, se muestra un guión como valor predeterminado. Este formato permite al recepcionista identificar fácilmente al paciente asociado con cada cita médica programada en el dashboard.
 
   const nombrePaciente = paciente
     ? `${paciente.nombre} ${paciente.apellido_paterno}${paciente.apellido_materno ? ` ${paciente.apellido_materno}` : ''}`
@@ -441,6 +462,9 @@ function CitaItem({ cita }: { cita: any }) {
   );
 }
 
+
+// El componente ListaItem representa un elemento individual de la lista de espera en el dashboard del recepcionista. Muestra información relevante sobre cada entrada en la lista de espera, incluyendo la especialidad médica, el nombre del paciente (si está disponible), su RUT, y una barra de progreso que indica la posición actual del paciente en la fila de espera en relación con el total de pacientes en esa especialidad. También incluye un botón para asignar una cita al paciente, lo que permite al recepcionista gestionar eficientemente las solicitudes de hora médica en lista de espera desde su perspectiva en el sistema de salud.
+
 function ListaItem({ datos, total, onAsignar }: { datos: any; total: number; onAsignar: (entrada: any) => void }) {
   const especialidad = Array.isArray(datos.especialidades) ? datos.especialidades[0] : datos.especialidades;
   const posicion = datos.posicion_actual_fila ?? 0;
@@ -449,6 +473,8 @@ function ListaItem({ datos, total, onAsignar }: { datos: any; total: number; onA
   const nombrePaciente = paciente
     ? `${paciente.nombre} ${paciente.apellido_paterno ?? ''} ${paciente.apellido_materno ?? ''}`.trim()
     : null;
+
+    // Formateo del nombre completo del paciente, incluyendo el nombre, apellido paterno y apellido materno (si existe). Si no se encuentra información del paciente, se muestra null como valor predeterminado. Este formato permite al recepcionista identificar fácilmente al paciente asociado con cada entrada en la lista de espera en el dashboard.
 
   return (
     <div className={styles.listaItem}>
@@ -473,6 +499,9 @@ function ListaItem({ datos, total, onAsignar }: { datos: any; total: number; onA
     </div>
   );
 }
+
+
+// El componente CalendarioMini es un componente de calendario compacto que se utiliza en el formulario de agendar cita para que el recepcionista pueda seleccionar la fecha de la cita médica. Permite navegar entre meses y seleccionar un día específico, mostrando visualmente el día seleccionado, el día actual y deshabilitando los días pasados. Este componente facilita al recepcionista la selección de fechas de manera rápida e intuitiva al agendar nuevas citas para los pacientes desde su perspectiva en el sistema de salud.
 
 function CalendarioMini({ selectedDate, onSelect }: { selectedDate: string; onSelect: (date: string) => void }) {
   const hoy = new Date();
@@ -501,6 +530,8 @@ function CalendarioMini({ selectedDate, onSelect }: { selectedDate: string; onSe
     onSelect(`${viewYear}-${m}-${d}`);
   };
 
+  // El componente devuelve la estructura visual del calendario compacto, que incluye un encabezado con botones para navegar entre meses y el mes y año actual, una cuadrícula que muestra los días de la semana y los días del mes, y estilos visuales para indicar el día seleccionado, el día actual y los días pasados. Este diseño permite al recepcionista seleccionar fácilmente la fecha de la cita médica al agendar nuevas citas para los pacientes desde su perspectiva en el sistema de salud.
+  
   return (
     <div className={styles.calendario}>
       <div className={styles.calHeader}>

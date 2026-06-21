@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase, createServerClient, getSupabaseAdmin } from '@sig-rednorte/database';
 
+// Ruta API para manejar el inicio de sesión de usuarios (pacientes, médicos y recepcionistas). Permite a los usuarios autenticarse mediante correo electrónico y contraseña, y devuelve un token de acceso y un token de actualización junto con información adicional según el rol del usuario. Requiere autenticación mediante token en el encabezado Authorization.
+
 export async function POST(req: NextRequest) {
   const { email, password } = await req.json();
 
@@ -56,6 +58,8 @@ export async function POST(req: NextRequest) {
     rut: meta.rut ?? null,
   });
 }
+
+// Función para manejar solicitudes OPTIONS, que responde a las solicitudes CORS preflight desde el frontend. Devuelve una respuesta con estado 204 (No Content) y los encabezados CORS definidos para permitir la comunicación entre el frontend y esta ruta de la API.
 
 export async function OPTIONS() {
   return new NextResponse(null, {

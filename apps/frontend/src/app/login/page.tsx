@@ -1,11 +1,17 @@
 'use client';
 
+//implementada por Benjamin Morales
+
+// Página de inicio de sesión para el sistema de gestión de RedNorte Salud
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './page.module.css';
 
+// API_LOGIN es la URL base para la API de autenticación. Se obtiene de las variables de entorno, con un valor predeterminado de 'http://localhost:3022' si no se ha definido.
 const API_LOGIN = process.env.NEXT_PUBLIC_API_LOGIN ?? 'http://localhost:3022';
 
+
+// LoginPage es un componente de React que representa la página de inicio de sesión. Permite a los usuarios ingresar su correo electrónico y contraseña para autenticarse. Al enviar el formulario, se realiza una solicitud POST a la API de autenticación para verificar las credenciales. Si la autenticación es exitosa, se almacenan los tokens de acceso y actualización en sessionStorage, junto con información adicional del usuario, y se redirige al usuario a la página correspondiente según su rol (paciente, médico o recepcionista). Si ocurre un error durante el proceso, se muestra un mensaje de error al usuario.
 export default function LoginPage() {
   const [email, setEmail]             = useState('');
   const [password, setPassword]       = useState('');
@@ -33,6 +39,7 @@ export default function LoginPage() {
 
       const { access_token, refresh_token, role, nombre, apellido, apellido_paterno, apellido_materno, rut } = await res.json();
 
+      // Almacenar los tokens de acceso y actualización en sessionStorage, junto con información adicional del usuario, y redirigir al usuario a la página correspondiente según su rol (paciente, médico o recepcionista).
       sessionStorage.setItem('access_token', access_token);
       sessionStorage.setItem('refresh_token', refresh_token);
       const nombreCompleto = [nombre, apellido ?? apellido_paterno, apellido_materno].filter(Boolean).join(' ');
@@ -53,6 +60,7 @@ export default function LoginPage() {
     }
   };
 
+  // El componente devuelve un formulario de inicio de sesión con campos para correo electrónico y contraseña, un botón para mostrar u ocultar la contraseña, y un botón para enviar el formulario. También incluye un enlace para ingresar con RUT (ClaveÚnica) y muestra mensajes de error si las credenciales son incorrectas o si ocurre un error inesperado durante el proceso de autenticación.
   return (
     <div className={styles.pageWrapper}>
       <div className={styles.card}>

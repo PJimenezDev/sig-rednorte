@@ -1,12 +1,18 @@
 'use client';
 
+// Página de autenticación para usuarios que desean ingresar con ClaveÚnica. Permite a los usuarios ingresar su RUN y contraseña de ClaveÚnica, y maneja la autenticación con el backend. Incluye opciones de accesibilidad como ajuste de tamaño de fuente y modo de alto contraste para mejorar la experiencia del usuario. Al autenticarse correctamente, redirige al usuario a la sección de pacientes. También proporciona enlaces para recuperar o solicitar una nueva ClaveÚnica, aunque estos enlaces no tienen funcionalidad implementada en este código.
+
+// implementada por Patricio Jimenez
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
+// El valor de la variable API se obtiene de la variable de entorno NEXT_PUBLIC_API_PACIENTES, que debe contener la URL base del backend para las operaciones relacionadas con pacientes. Si esta variable no está definida, se utiliza 'http://localhost:3020' como valor predeterminado, lo que es útil para el desarrollo local.
 const API = process.env.NEXT_PUBLIC_API_PACIENTES ?? 'http://localhost:3020';
 
+// Función para limpiar el RUN ingresado por el usuario, eliminando espacios, puntos y guiones, y convirtiendo a minúsculas. Esto asegura que el formato del RUN sea consistente antes de enviarlo al backend para autenticación.
 const cleanRut = (value: string) => value.trim().replace(/[^0-9kK]/g, '').toLowerCase();
 
+// Función para formatear el RUN ingresado por el usuario, agregando puntos y guiones en el formato estándar chileno. Esto mejora la legibilidad del RUN mientras el usuario lo ingresa, aunque el valor limpio se utiliza para la autenticación.
 const formatRut = (value: string) => {
   const clean = value.replace(/[^0-9kK]/g, '');
   if (clean.length === 0) return '';
@@ -16,6 +22,9 @@ const formatRut = (value: string) => {
   const cuerpoFormateado = cuerpo.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
   return `${cuerpoFormateado}-${dv}`;
 };
+
+
+// Componente principal de la página de autenticación con ClaveÚnica. Maneja el estado del formulario, la lógica de autenticación y la interfaz de usuario. Permite a los usuarios ingresar su RUN y contraseña, y proporciona opciones de accesibilidad para mejorar la experiencia del usuario.
 
 export default function ClaveunicaPage() {
   const [rut, setRut] = useState('');
@@ -65,6 +74,7 @@ export default function ClaveunicaPage() {
     }
   };
 
+  // Definición de colores para el modo normal y el modo de alto contraste. Estos colores se utilizan en toda la interfaz para garantizar una buena legibilidad y accesibilidad, especialmente para usuarios con dificultades visuales. El modo de alto contraste utiliza colores brillantes y contrastantes para mejorar la visibilidad del texto y los elementos interactivos.
   const colors = {
     bg: highContrast ? '#000000' : '#ffffff',
     text: highContrast ? '#ffff00' : '#555555',
@@ -113,7 +123,7 @@ export default function ClaveunicaPage() {
           <div style={{ marginBottom: '20px' }}>
             <input type="text" placeholder="Ingresa tu RUN" value={rut} onChange={handleRutChange} required style={{ width: '100%', padding: '14px 16px', border: `2px solid ${colors.inputBorder}`, borderRadius: '0px', fontSize: `${16 * fontSizeMultiplier}px`, boxSizing: 'border-box', outline: 'none', backgroundColor: colors.inputBg, color: colors.inputText }} />
           </div>
-
+          
           <div style={{ marginBottom: '25px', display: 'flex' }}>
             <input type={showPassword ? 'text' : 'password'} placeholder="Ingresa tu ClaveÚnica" value={password} onChange={e => setPassword(e.target.value)} required style={{ flex: 1, padding: '14px 16px', border: `2px solid ${colors.inputBorder}`, borderRight: 'none', borderRadius: '0px', fontSize: `${16 * fontSizeMultiplier}px`, boxSizing: 'border-box', outline: 'none', backgroundColor: colors.inputBg, color: colors.inputText }} />
             <button type="button" onClick={() => setShowPassword(!showPassword)} style={{ width: '50px', backgroundColor: highContrast ? '#ffff00' : '#9aa5ec', border: `2px solid ${colors.inputBorder}`, borderLeft: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: highContrast ? '#000000' : '#ffffff' }}>

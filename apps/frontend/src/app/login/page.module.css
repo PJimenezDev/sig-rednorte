@@ -1,3 +1,8 @@
+/* Estilos CSS para la página de login. Define la apariencia de la página, incluyendo el diseño del contenedor principal, las tarjetas, los campos de entrada, los botones y otros elementos de la interfaz. Se utilizan colores suaves y un diseño limpio para mejorar la experiencia del usuario, con un enfoque en la legibilidad y la accesibilidad.*/
+
+/* implementada por Benjamin Morales */
+
+/* Contenedor principal */
 .pageWrapper {
   min-height: 100vh;
   background-color: #f4f7f6;
@@ -7,6 +12,7 @@
   font-family: system-ui, sans-serif;
 }
 
+/* Estilos para la tarjeta principal */
 .card {
   background-color: #ffffff;
   border-radius: 14px;
@@ -16,7 +22,7 @@
   border: 1px solid #e2e8f0;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.07);
 }
-
+/* Estilos para la fila del logo */
 .logoRow {
   display: flex;
   align-items: center;
@@ -24,6 +30,7 @@
   margin-bottom: 28px;
 }
 
+/* Estilos para el círculo del logo */
 .logoCircle {
   border: 2px solid #0044b1;
   width: 36px;
@@ -35,6 +42,7 @@
   flex-shrink: 0;
 }
 
+/* Estilos para el punto del logo */
 .logoDot {
   width: 13px;
   height: 13px;
@@ -42,6 +50,7 @@
   border-radius: 50%;
 }
 
+/* Estilos para el título del logo */
 .logoTitle {
   margin: 0;
   font-size: 16px;
@@ -49,12 +58,14 @@
   color: #0f172a;
 }
 
+/* Estilos para el subtítulo del logo */
 .logoSubtitle {
   margin: 0;
   font-size: 11px;
   color: #64748b;
 }
 
+/* Estilos para el título principal */
 .title {
   margin: 0 0 6px 0;
   font-size: 20px;
@@ -62,16 +73,19 @@
   color: #0f172a;
 }
 
+/* Estilos para el subtítulo principal */
 .subtitle {
   margin: 0 0 28px 0;
   font-size: 13px;
   color: #64748b;
 }
 
+/* Estilos para el campo de entrada */
 .field {
   margin-bottom: 16px;
 }
 
+/* Estilos para la etiqueta del campo de entrada */
 .label {
   display: block;
   font-size: 12px;
@@ -80,6 +94,7 @@
   margin-bottom: 6px;
 }
 
+/* Estilos para el campo de entrada */
 .input {
   width: 100%;
   padding: 10px 12px;
@@ -92,17 +107,20 @@
   outline: none;
 }
 
+/* Estilos para el campo de entrada cuando está enfocado */
 .input:focus {
   border-color: #0044b1;
   background-color: #ffffff;
 }
 
+/* Estilos para el contenedor del campo de entrada con icono */
 .inputWrapper {
   position: relative;
   display: flex;
   align-items: center;
 }
 
+/* Estilos para el campo de entrada con icono */
 .inputWithIcon {
   width: 100%;
   padding: 10px 40px 10px 12px;
@@ -115,11 +133,13 @@
   outline: none;
 }
 
+/* Estilos para el campo de entrada con icono cuando está enfocado */
 .inputWithIcon:focus {
   border-color: #0044b1;
   background-color: #ffffff;
 }
 
+/* Estilos para el botón del ojo */
 .eyeBtn {
   position: absolute;
   right: 10px;
@@ -132,8 +152,10 @@
   align-items: center;
 }
 
+/* Estilos para el botón del ojo cuando se pasa el mouse por encima */
 .eyeBtn:hover { color: #475569; }
 
+/* Estilos para el mensaje de error */
 .error {
   background-color: #fef2f2;
   border: 1px solid #fecaca;
@@ -144,6 +166,7 @@
   margin-bottom: 16px;
 }
 
+/* Estilos para el botón de envío */
 .btnSubmit {
   width: 100%;
   padding: 11px;
@@ -157,9 +180,11 @@
   margin-top: 4px;
 }
 
+/* Estilos para el botón de envío cuando se pasa el mouse por encima */
 .btnSubmit:hover { background-color: #003494; }
 .btnSubmit:disabled { background-color: #94a3b8; cursor: not-allowed; }
 
+/* Estilos para el divisor */
 .divider {
   display: flex;
   align-items: center;
@@ -169,6 +194,7 @@
   font-size: 12px;
 }
 
+/* Estilos para el divisor */
 .divider::before,
 .divider::after {
   content: '';
@@ -176,6 +202,7 @@
   border-top: 1px solid #e2e8f0;
 }
 
+/* Estilos para el botón de clave única */
 .btnClaveunica {
   width: 100%;
   padding: 11px;
@@ -188,4 +215,5 @@
   cursor: pointer;
 }
 
+/* Estilos para el botón de clave única cuando se pasa el mouse por encima */
 .btnClaveunica:hover { background-color: #eff6ff; }

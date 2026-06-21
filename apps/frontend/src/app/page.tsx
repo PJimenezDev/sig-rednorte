@@ -1,11 +1,13 @@
 'use client';
-
+//implementada por Benjamin Morales
 import React from 'react';
 import { useRouter } from 'next/navigation';
 
+// Esta página es la página de aterrizaje (landing page) para los usuarios que acceden al portal ciudadano de RedNorte Salud. Proporciona una bienvenida y una breve descripción del portal, e incluye un botón para ingresar con ClaveÚnica, que redirige a los usuarios a la página de autenticación correspondiente. También ofrece un enlace para que el personal de la RedNorte pueda iniciar sesión en su área institucional.
 export default function LandingPage() {
   const router = useRouter();
 
+  // El componente devuelve un diseño centrado con un título, una descripción, un mensaje informativo sobre la necesidad de validar la identidad para gestionar citas médicas, un botón para ingresar con ClaveÚnica que redirige a la página de autenticación, y un enlace para que el personal de la RedNorte pueda iniciar sesión en su área institucional.
   return (
     <div style={{ maxWidth: '500px', margin: '150px auto', fontFamily: 'system-ui, sans-serif', padding: '30px', textAlign: 'center', border: '1px solid #e2e8f0', borderRadius: '12px', boxShadow: '0 4px 10px rgba(0,0,0,0.05)' }}>
       <h1 style={{ color: '#0f4c81', fontSize: '28px', marginBottom: '10px' }}>SIG-RedNorte</h1>
@@ -19,6 +21,7 @@ export default function LandingPage() {
         </p>
       </div>
 
+// Botón para ingresar con ClaveÚnica que redirige a la página de autenticación correspondiente.
       <button
         onClick={() => router.push('/auth/claveunica')}
         style={{ width: '100%', padding: '14px', backgroundColor: '#0f4c81', color: 'white', border: 'none', borderRadius: '6px', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer' }}
@@ -28,6 +31,7 @@ export default function LandingPage() {
         Ingresar con ClaveÚnica
       </button>
 
+// Enlace para que el personal de la RedNorte pueda iniciar sesión en su área institucional.
       <p style={{ marginTop: '24px', fontSize: '13px', color: '#94a3b8' }}>
         ¿Eres personal de la RedNorte?{' '}
         <a onClick={() => router.push('/login')} style={{ color: '#0044b1', cursor: 'pointer', textDecoration: 'underline' }}>

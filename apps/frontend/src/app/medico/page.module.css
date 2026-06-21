@@ -1,3 +1,6 @@
+/*implementado por Benjamin Morales*/
+
+/* Estilos CSS para la página del médico. Define la apariencia de la página, incluyendo el diseño del contenedor principal, el encabezado, las tarjetas de información, los botones y otros elementos de la interfaz. Se utilizan colores suaves y un diseño limpio para mejorar la experiencia del usuario, con un enfoque en la legibilidad y la accesibilidad. */
 .pageWrapper {
   background-color: #f4f7f6;
   min-height: 100vh;
@@ -5,6 +8,7 @@
   color: #1e293b;
 }
 
+/* Contenedor para el estado de carga */
 .loadingContainer {
   display: flex;
   height: 100vh;
@@ -13,11 +17,12 @@
   background-color: #f4f7f6;
 }
 
+/* Texto para el estado de carga */
 .loadingText {
   font-weight: 500;
   color: #64748b;
 }
-
+/* Encabezado */
 .header {
   background-color: #ffffff;
   padding: 14px 40px;
@@ -27,12 +32,14 @@
   border-bottom: 2px solid #e2e8f0;
 }
 
+/* Logo del encabezado */
 .headerLogo {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
+/* Círculo del logo */
 .logoCircle {
   border: 2px solid #0044b1;
   width: 34px;
@@ -43,6 +50,7 @@
   justify-content: center;
 }
 
+/* Punto del logo */
 .logoDot {
   width: 12px;
   height: 12px;
@@ -50,6 +58,7 @@
   border-radius: 50%;
 }
 
+/* Título del logo */
 .logoTitle {
   margin: 0;
   font-size: 15px;
@@ -57,20 +66,24 @@
   color: #0f172a;
 }
 
+/* Subtítulo del logo */
 .logoSubtitle {
   margin: 0;
   font-size: 11px;
   color: #64748b;
 }
 
+/* Contenedor de la parte derecha del encabezado */
 .headerRight {
   display: flex;
   align-items: center;
   gap: 20px;
 }
 
+/* Información del usuario */
 .userInfo { text-align: right; }
 
+/* Nombre del usuario */
 .userName {
   margin: 0;
   font-weight: 600;
@@ -78,12 +91,14 @@
   text-transform: capitalize;
 }
 
+/* RUT del usuario */
 .userRut {
   margin: 0;
   font-size: 12px;
   color: #64748b;
 }
 
+/* Botón de cerrar sesión */
 .logoutBtn {
   padding: 8px 18px;
   border: 1px solid #cbd5e1;
@@ -95,14 +110,17 @@
   color: #1e293b;
 }
 
+/* Botón de cerrar sesión */
 .logoutBtn:hover { background-color: #f8fafc; }
 
+/* Contenedor principal */
 .main {
   max-width: 1200px;
   margin: 0 auto;
   padding: 36px 24px;
 }
 
+/* Título de bienvenida */
 .welcomeTitle {
   margin: 0 0 4px 0;
   font-size: 22px;
@@ -110,12 +128,14 @@
   color: #0f172a;
 }
 
+/* Subtítulo de bienvenida */
 .welcomeSubtitle {
   margin: 0 0 28px 0;
   font-size: 14px;
   color: #64748b;
 }
 
+/* Grid de KPIs */
 .kpiGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -123,6 +143,7 @@
   margin-bottom: 28px;
 }
 
+/* Tarjeta de KPI */
 .kpiCard {
   background-color: #ffffff;
   padding: 18px 20px;
@@ -131,6 +152,7 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
+/* Etiqueta de KPI */
 .kpiLabel {
   margin: 0 0 6px 0;
   font-size: 12px;
@@ -138,22 +160,26 @@
   font-weight: 500;
 }
 
+/* Valor de KPI */
 .kpiValue {
   margin: 0;
   font-size: 28px;
   font-weight: 800;
 }
 
+/* Colores de valor de KPI */
 .kpiValueBlue  { color: #0044b1; }
 .kpiValueAmber { color: #f59e0b; }
 .kpiValueGreen { color: #22c55e; }
 
+/* Grid de contenido */
 .contentGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 24px;
 }
 
+/* Tarjeta de contenido */
 .card {
   background-color: #ffffff;
   border-radius: 12px;
@@ -162,6 +188,7 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
+/* Título de sección */
 .sectionTitle {
   margin: 0 0 18px 0;
   font-size: 15px;
@@ -171,6 +198,7 @@
   padding-bottom: 12px;
 }
 
+/* Estilo para el estado vacío */
 .emptyState {
   padding: 32px 0;
   text-align: center;
@@ -179,6 +207,7 @@
   margin: 0;
 }
 
+/* Icono para el estado vacío */
 .citasList {
   display: flex;
   flex-direction: column;
@@ -186,6 +215,7 @@
   margin-bottom: 16px;
 }
 
+/* Estilo para cada cita en la lista */
 .citaItem {
   border: 1px solid #e2e8f0;
   border-radius: 8px;
@@ -193,6 +223,7 @@
   background-color: #f8fafc;
 }
 
+/* Especialidad de la cita */
 .citaEspecialidad {
   margin: 0 0 4px 0;
   color: #0044b1;
@@ -202,6 +233,7 @@
   letter-spacing: 0.04em;
 }
 
+/* Prioridad de la cita */
 .citaLabelPaciente {
   margin: 0 0 2px 0;
   font-size: 10px;
@@ -211,6 +243,7 @@
   letter-spacing: 0.06em;
 }
 
+/* Nombre del paciente en la cita */
 .citaPaciente {
   margin: 0 0 2px 0;
   font-size: 13px;
@@ -219,12 +252,14 @@
   text-transform: capitalize;
 }
 
+/* RUT del paciente en la cita */
 .citaRut {
   margin: 0 0 6px 0;
   font-size: 11px;
   color: #64748b;
 }
 
+/* Detalles de la cita */
 .citaDetalle {
   margin: 3px 0;
   font-size: 12px;

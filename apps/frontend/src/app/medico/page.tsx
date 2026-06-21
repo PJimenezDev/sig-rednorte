@@ -1,11 +1,14 @@
 'use client';
-
+// Implementada por Benjamin Morales
+// DashboardMedico es el componente principal que representa el panel de control para los médicos en el sistema de gestión de RedNorte Salud. Permite a los médicos ver sus citas programadas, gestionar la lista de espera de pacientes, agendar nuevas citas y asignarse citas desde la lista de espera. El componente utiliza React para manejar el estado y la lógica de la interfaz, y se comunica con una API backend para obtener y actualizar los datos relacionados con las citas y la lista de espera.
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './page.module.css';
 
+// API es la URL base para la API de gestión médica. Se obtiene de las variables de entorno, con un valor predeterminado de 'http://localhost:3023' si no se ha definido.
 const API = process.env.NEXT_PUBLIC_API_MEDICO ?? 'http://localhost:3023';
 
+// Función para formatear el RUT ingresado por el usuario, eliminando caracteres no válidos y aplicando el formato estándar con puntos y guión.
 const formatearRut = (valor: string): string => {
   const limpio = valor.replace(/[^0-9kK-]/g, '');
   if (!limpio.includes('-')) return limpio;
@@ -15,10 +18,13 @@ const formatearRut = (valor: string): string => {
   return dvLimpio ? `${cuerpoFormateado}-${dvLimpio}` : `${cuerpoFormateado}-`;
 };
 
+// Función para validar que el RUT ingresado tenga el formato correcto, con un guión y un dígito verificador al final.
 const rutTieneFormato = (rut: string): boolean => {
   const partes = rut.split('-');
   return partes.length === 2 && partes[0].length > 0 && partes[1].length === 1;
 };
+
+// DashboardMedico es el componente principal que representa el panel de control para los médicos en el sistema de gestión de RedNorte Salud. Permite a los médicos ver sus citas programadas, gestionar la lista de espera de pacientes, agendar nuevas citas y asignarse citas desde la lista de espera. El componente utiliza React para manejar el estado y la lógica de la interfaz, y se comunica con una API backend para obtener y actualizar los datos relacionados con las citas y la lista de espera.
 
 export default function DashboardMedico() {
   const [nombre, setNombre] = useState<string>('Médico');
@@ -53,6 +59,7 @@ export default function DashboardMedico() {
     fetchDashboard(token, r ?? '');
   }, []);
 
+  // Función para cargar los datos del panel de control, incluyendo las citas programadas y la lista de espera de pacientes. Realiza una solicitud a la API backend utilizando el token de autenticación y el RUT del médico para obtener la información relevante. Si el token no es válido o ha expirado, redirige al usuario a la página de inicio de sesión.
   const fetchDashboard = async (token: string, rutMedico: string) => {
     try {
       const res = await fetch(`${API}/api/medico/dashboard?rut=${encodeURIComponent(rutMedico)}`, {
@@ -74,6 +81,7 @@ export default function DashboardMedico() {
     router.push('/login');
   };
 
+  // Función para abrir el modal de asignación de cita desde la lista de espera. Recibe la entrada de la lista de espera como parámetro, extrae la información del paciente y la cita, y establece el estado del modal con los datos necesarios para que el médico pueda asignarse esa cita.
   const abrirModalAsignar = (entrada: any) => {
     const p = Array.isArray(entrada.pacientes) ? entrada.pacientes[0] : entrada.pacientes;
     const nombrePaciente = p
@@ -84,6 +92,8 @@ export default function DashboardMedico() {
     setAsignarHora('');
     setAsignarError(null);
   };
+
+  // Función para manejar la asignación de una cita desde la lista de espera. Verifica que se hayan seleccionado una fecha y hora, y luego realiza una solicitud a la API backend para asignar la cita al médico. Si la asignación es exitosa, cierra el modal y recarga los datos del panel para reflejar los cambios.
 
   const handleAsignarCita = async () => {
     if (!asignarFecha || !asignarHora) { setAsignarError('Selecciona fecha y hora.'); return; }
@@ -116,6 +126,7 @@ export default function DashboardMedico() {
     }
   };
 
+  // Función para abrir el modal de agendar nueva cita. Establece el estado del formulario de cita con el RUT del médico actual y limpia cualquier error previo. También realiza una solicitud a la API backend para obtener la especialidad del médico y mostrarla en el formulario de agendamiento.
   const abrirModal = async () => {
     const rutActual = sessionStorage.getItem('rut_usuario') ?? '';
     setFormCita({ rutPaciente: '', rutMedico: rutActual, fecha: '', hora: '' });
@@ -137,6 +148,7 @@ export default function DashboardMedico() {
     }
   };
 
+  // Función para manejar el agendamiento de una nueva cita. Verifica que se hayan completado todos los campos obligatorios y que el RUT del paciente tenga el formato correcto. Luego realiza una solicitud a la API backend para crear la nueva cita con los datos proporcionados. Si el agendamiento es exitoso, cierra el modal y recarga los datos del panel para reflejar la nueva cita.
   const handleAgendarCita = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formCita.rutPaciente || !formCita.fecha || !formCita.hora) {
@@ -173,6 +185,7 @@ export default function DashboardMedico() {
     }
   };
 
+  // Si los datos del panel aún se están cargando, muestra un mensaje de carga en lugar del contenido del panel. Esto proporciona retroalimentación visual al usuario mientras se obtienen los datos desde la API backend.
   if (loading) {
     return (
       <div className={styles.loadingContainer}>
@@ -181,9 +194,11 @@ export default function DashboardMedico() {
     );
   }
 
+  // Calcula los KPI para mostrar en el panel, incluyendo el número de citas confirmadas, el número de pacientes en lista de espera y el número de notificaciones (citas asignadas pero no confirmadas). Estos valores se derivan de los datos de citas y lista de espera obtenidos desde la API backend.
   const citasConfirmadas = citas.filter(c => c.estado === 'confirmada').length;
   const notificaciones = citas.filter(c => c.estado === 'asignada').length;
 
+  // El componente devuelve la estructura principal del panel de control para el médico, que incluye un encabezado con el nombre del médico y un botón de cierre de sesión, una sección principal con los KPI y las listas de citas y pacientes en espera, y modales para agendar nuevas citas y asignarse citas desde la lista de espera. Cada sección y elemento tiene estilos aplicados desde el archivo CSS correspondiente para mejorar la apariencia visual del panel.
   return (
     <div className={styles.pageWrapper}>
       <header className={styles.header}>
@@ -245,6 +260,8 @@ export default function DashboardMedico() {
         </div>
       </main>
 
+// Modales para agendar nuevas citas y asignarse citas desde la lista de espera. Estos modales se muestran de forma condicional según el estado del componente, y contienen formularios para ingresar los datos necesarios para cada acción. También manejan la lógica de envío de los formularios y muestran mensajes de error si ocurre algún problema durante el proceso.
+
       {modalAgendar && (
         <div className={styles.modalOverlay}>
           <div className={styles.modalBox}>
@@ -295,6 +312,8 @@ export default function DashboardMedico() {
         </div>
       )}
 
+// Modal para asignarse una cita desde la lista de espera. Se muestra cuando el médico hace clic en el botón para asignarse una cita, y contiene un formulario para seleccionar la fecha y hora de la cita. También maneja la lógica de envío del formulario y muestra mensajes de error si ocurre algún problema durante el proceso de asignación.
+
       {modalAsignar && (
         <div className={styles.modalOverlay}>
           <div className={styles.modalBox}>
@@ -329,6 +348,7 @@ export default function DashboardMedico() {
   );
 }
 
+// KpiCard es un componente reutilizable que representa una tarjeta de indicador clave de rendimiento (KPI) en el panel de control. Recibe una etiqueta, un valor numérico y una clase de estilo para el valor, y muestra esta información de manera visualmente destacada. Se utiliza para mostrar los KPI de citas confirmadas, pacientes en lista de espera y notificaciones en el panel del médico.
 function KpiCard({ label, valor, valueClass }: { label: string; valor: number; valueClass: string }) {
   return (
     <div className={styles.kpiCard}>
@@ -337,6 +357,8 @@ function KpiCard({ label, valor, valueClass }: { label: string; valor: number; v
     </div>
   );
 }
+
+// CitaItem es un componente que representa una tarjeta de cita médica en la lista de citas del médico. Recibe los datos de una cita y muestra información relevante como el nombre del paciente, la especialidad médica, la fecha y hora de la cita, y el lugar donde se realizará. También muestra un badge con el estado de la cita (asignada o confirmada) para que el médico pueda identificar rápidamente el estado de cada cita en su agenda.
 
 function CitaItem({ cita }: { cita: any }) {
   const agenda = Array.isArray(cita.agendas) ? cita.agendas[0] : cita.agendas;
@@ -355,10 +377,12 @@ function CitaItem({ cita }: { cita: any }) {
     }
   }
 
+  // Construye el nombre completo del paciente a partir de sus datos, asegurándose de manejar casos donde algunos campos puedan estar ausentes. Si no se encuentra información del paciente, muestra un guión como valor predeterminado.
   const nombrePaciente = paciente
     ? `${paciente.nombre} ${paciente.apellido_paterno}${paciente.apellido_materno ? ` ${paciente.apellido_materno}` : ''}`
     : '—';
 
+    // El componente devuelve la estructura visual de la tarjeta de cita, que incluye el badge de estado, el nombre del paciente, su RUT, la especialidad médica, los detalles de fecha y hora, y el lugar de la cita. Cada elemento tiene estilos aplicados para mejorar la legibilidad y la apariencia general de la tarjeta dentro del panel del médico.
   return (
     <div className={styles.citaItem}>
       <div className={styles.badgeRow}>
@@ -374,6 +398,8 @@ function CitaItem({ cita }: { cita: any }) {
     </div>
   );
 }
+
+// ListaItem es un componente que representa una entrada en la lista de espera de pacientes para una especialidad médica. Recibe los datos de la entrada, el total de pacientes en espera para esa especialidad y una función para manejar la asignación de la cita. Muestra información relevante como la especialidad, el nombre del paciente (si está disponible), su RUT, y una barra de progreso que indica la posición del paciente en la fila de espera en relación con el total de pacientes. También incluye un botón para que el médico pueda asignarse esa cita directamente desde la lista de espera.
 
 function ListaItem({ datos, total, onAsignar }: { datos: any; total: number; onAsignar: (entrada: any) => void }) {
   const especialidad = Array.isArray(datos.especialidades) ? datos.especialidades[0] : datos.especialidades;
@@ -408,6 +434,8 @@ function ListaItem({ datos, total, onAsignar }: { datos: any; total: number; onA
   );
 }
 
+// CalendarioMini es un componente que representa un calendario compacto para seleccionar fechas. Permite navegar entre meses y seleccionar un día específico. El componente muestra el mes y año actual, los días de la semana, y resalta el día seleccionado, el día actual y los días pasados. Al seleccionar un día, se llama a la función onSelect con la fecha seleccionada en formato 'YYYY-MM-DD'. Este componente se utiliza en el formulario de agendamiento de citas para que el médico pueda elegir la fecha de la cita de manera visual e intuitiva.
+
 function CalendarioMini({ selectedDate, onSelect }: { selectedDate: string; onSelect: (date: string) => void }) {
   const hoy = new Date();
   const [viewYear, setViewYear] = useState(hoy.getFullYear());
@@ -435,6 +463,8 @@ function CalendarioMini({ selectedDate, onSelect }: { selectedDate: string; onSe
     onSelect(`${viewYear}-${m}-${d}`);
   };
 
+  // El componente devuelve la estructura visual del calendario, que incluye un encabezado con botones para navegar entre meses y el nombre del mes y año actual, una cuadrícula que muestra los días de la semana y los días del mes, y estilos para resaltar el día seleccionado, el día actual y los días pasados. Los días que ya han pasado no son seleccionables, mientras que el día seleccionado se resalta para indicar claramente al usuario qué fecha ha elegido.
+  
   return (
     <div className={styles.calendario}>
       <div className={styles.calHeader}>

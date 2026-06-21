@@ -1,3 +1,5 @@
+// Archivo de configuración de Next.js para la aplicación web-recepcionista. Configura los encabezados CORS para las rutas de la API para permitir solicitudes desde el origen especificado (http://localhost:3010).
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   async headers() {
